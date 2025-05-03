@@ -71,6 +71,7 @@
 
 </tr>
 </table>
+ <!-- konec VÝBĚR BAREV -->
 
 
      <!-- KONTROLA VZORU -->
@@ -121,11 +122,21 @@
         }
     </script>
 
-    <h1>Další vlajka</h1>
-    <form action="random_page.php" method="post">
-        <button type="submit">Načíst náhodnou stránku</button>
-    </form>
+ <h1>Další vlajka</h1>
+    <button id="randomButton">Otevřít náhodnou stránku</button>
+<script>
+    const pages = [
+        'austria.html',
+        'bulgary.html',
+        'germany.html',
+        // Přidej další URL adresy podle potřeby
+    ];
 
+    document.getElementById('randomButton').addEventListener('click', function() {
+        const randomIndex = Math.floor(Math.random() * pages.length);
+        window.open(pages[randomIndex], '_blank');
+    });
+</script>
 </div>
 </body>
 </html>
