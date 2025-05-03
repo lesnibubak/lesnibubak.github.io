@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Color the flag</title>
+    <title>COLOR THE FLAG</title>
     <style>
         table {
             width: 350px;
@@ -14,7 +14,7 @@
         td {
             height: 50px;
             cursor: pointer;
-            border: 1px solid #000; /*  comment */
+            border: 1px solid #000;
         }
 
         .color-option {
@@ -33,7 +33,7 @@
 
 <div align="center">
 
-<p> AUSTRIA
+<p> HUNGARY
     <table bgcolor="lightgrey" id="colorTable">
         <tr>
             <td></td>
@@ -73,6 +73,7 @@
 </table>
  <!-- konec VÝBĚR BAREV -->
 
+
      <!-- KONTROLA VZORU -->
     <button id="checkButton">CHECK</button>
 
@@ -102,7 +103,7 @@
         function checkPattern() {
             const correctPattern = ['red', // Horní řádek
                                     'white',// Prostřední řádek
-                                    'red']; // Spodní řádek
+                                    'green']; // Spodní řádek
 
             let correct = true;
 
@@ -114,7 +115,7 @@
             });
 
             if (correct) {
-                alert('CORRECTOMUNDO!');
+                 alert('CORRECTOMUNDO!');
             } else {
                 alert('TRY AGAIN!');
             }
