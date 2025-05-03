@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color the flag</title>
+    <style>
+        table {
+            width: 350px;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        td {
+            height: 50px;
+            cursor: pointer;
+            border: 1px solid #000; /*  comment */
+        }
+
+        .color-option {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+            cursor: pointer;
+            border: 1px solid #000;
+            margin: 5px;
+        }
+    </style>
+
+
+</head>
+<body>
+
+<div align="center">
+
+<p> AUSTRIA
+    <table bgcolor="lightgrey" id="colorTable">
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+        </tr>
+    </table>
+
+ <!-- VÝBĚR BAREV -->
+<table>
+<tr>
+<td> <div class="color-option" style="background-color: black;" data-color="black"><br><br>černá</div></td>
+<td> <div class="color-option" style="background-color: yellow;" data-color="yellow"><br><br>žlutá</div></td>
+<td> <div class="color-option" style="background-color: red;" data-color="red"><br><br>červená</div></td>
+<td> <div class="color-option" style="background-color: blue;" data-color="blue"><br><br>modrá</div></td>
+</tr>
+
+<tr>
+<td><div class="color-option" style="background-color: white;" data-color="white"><br><br>bílá</div></td>
+<td><div class="color-option" style="background-color: gold;" data-color="gold"><br><br>zlatá</div></td>
+<td><div class="color-option" style="background-color: orange;" data-color="orange"><br><br>oranžová</div></td>
+<td><div class="color-option" style="background-color: green;" data-color="green"><br><br>zelená</div></td>
+
+</tr>
+
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+
+</tr>
+</table>
+ <!-- konec VÝBĚR BAREV -->
+
+     <!-- KONTROLA VZORU -->
+    <button id="checkButton">CHECK</button>
+
+    <script>
+        const checkButton = document.getElementById('checkButton');
+        const cells = document.querySelectorAll('#colorTable td');
+        let selectedColor = 'black'; // Výchozí barva
+
+        // Přidání klikací funkce na barevné možnosti
+        const colorOptions = document.querySelectorAll('.color-option');
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                selectedColor = option.getAttribute('data-color'); // Nastavení vybrané barvy
+            });
+        });
+
+        // Přidání klikací funkce na každé políčko
+        cells.forEach((cell) => {
+            cell.addEventListener('click', () => {
+                // Změna barvy políčka na vybranou barvu
+                cell.style.backgroundColor = selectedColor;
+            });
+        });
+
+        checkButton.addEventListener('click', checkPattern);
+
+        function checkPattern() {
+            const correctPattern = ['red', // Horní řádek
+                                    'white',// Prostřední řádek
+                                    'red']; // Spodní řádek
+
+            let correct = true;
+
+            cells.forEach((cell, index) => {
+                const color = cell.style.backgroundColor;
+                if (color !== correctPattern[index]) {
+                    correct = false;
+                }
+            });
+
+            if (correct) {
+                alert('CORRECTOMUNDO!');
+            } else {
+                alert('TRY AGAIN!');
+            }
+        }
+    </script>
+
+
+    <button id="randomButton">NEXT FLAG</button>
+<script>
+    const pages = [
+        'en/austria.html',
+        'en/bulgary.html',
+        'en/germany.html',
+        // Přidej další URL adresy podle potřeby
+    ];
+
+    document.getElementById('randomButton').addEventListener('click', function() {
+        const randomIndex = Math.floor(Math.random() * pages.length);
+        window.location.href = pages[randomIndex]; // Přesměruj na náhodnou stránku
+    });
+</script>
+
+</div>
+</body>
+</html>
