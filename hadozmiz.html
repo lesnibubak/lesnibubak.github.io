@@ -22,6 +22,7 @@
             display: flex;
             gap: 40px;
             align-items: flex-start;
+            margin-bottom: 30px;
         }
         
         .table-box {
@@ -53,10 +54,10 @@
         }
         
         .option-group {
-            margin: 15px 0;
+            margin: 10px 0;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 5px;
         }
         
         .option-label {
@@ -67,17 +68,17 @@
         input[type="range"] {
             font-family: 'Courier New', monospace;
             background-color: #000;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            padding: 5px;
+            border: 1px solid currentColor;
+            padding: 3px;
             width: 100%;
+            height: 20px;
         }
         
         select {
             font-family: 'Courier New', monospace;
             background-color: #000;
-            color: #00ff00;
-            border: 1px solid #00ff00;
+            color: currentColor;
+            border: 1px solid currentColor;
             padding: 5px;
             width: 100%;
         }
@@ -85,7 +86,7 @@
         button {
             padding: 8px 15px;
             font-size: 14px;
-            background-color: #00ff00;
+            background-color: currentColor;
             color: #000;
             border: none;
             cursor: pointer;
@@ -95,7 +96,7 @@
         }
         
         button:hover {
-            background-color: #00cc00;
+            opacity: 0.8;
         }
         
         #score-display {
@@ -103,18 +104,40 @@
             font-weight: bold;
             text-align: center;
             padding: 10px;
-            border-top: 1px solid #00ff00;
+            border-top: 1px solid currentColor;
+            margin-top: 15px;
         }
         
         #status {
-            margin-top: 20px;
             text-align: center;
         }
         
         .game-over {
-            color: #ff0000;
+            color: #ff6600;
             font-weight: bold;
             font-size: 18px;
+        }
+        
+        .game-won {
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        #rules-box {
+            border: 2px solid currentColor;
+            background-color: #000;
+            padding: 15px;
+            max-width: 300px;
+            line-height: 1.6;
+            font-size: 13px;
+        }
+        
+        #rules-box .title {
+            font-weight: bold;
+            border-bottom: 1px solid currentColor;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
         }
     </style>
 </head>
@@ -125,39 +148,49 @@
             <div id="game-container"></div>
         </div>
         
-        <div class="table-box">
-            <div class="table-title">OPTIONS</div>
-            <div id="options-panel">
-                <div class="option-group">
-                    <div class="option-label">Color</div>
-                    <select id="color">
-                        <option value="#00ff00">Green</option>
-                        <option value="#00ccff">Cyan</option>
-                        <option value="#ffff00">Yellow</option>
-                        <option value="#ff00ff">Magenta</option>
-                        <option value="#ffffff">White</option>
-                    </select>
+        <div>
+            <div class="table-box">
+                <div class="table-title">OPTIONS</div>
+                <div id="options-panel">
+                    <div class="option-group">
+                        <div class="option-label">Speed</div>
+                        <input type="range" id="speed" min="1" max="5" value="3">
+                    </div>
+                    
+                    <div class="option-group">
+                        <div class="option-label">Color</div>
+                        <select id="color">
+                            <option value="#00ff00">Green</option>
+                            <option value="#00ccff">Cyan</option>
+                            <option value="#ffff00">Yellow</option>
+                            <option value="#ff00ff">Magenta</option>
+                            <option value="#ffffff">White</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group">
+                        <div class="option-label">Difficulty</div>
+                        <select id="difficulty">
+                            <option value="3">A-C</option>
+                            <option value="5">A-E</option>
+                            <option value="7" selected>A-G</option>
+                        </select>
+                    </div>
+                    
+                    <div class="option-group" style="margin-top: 15px;">
+                        <button onclick="startGame()">NEW GAME</button>
+                    </div>
+                    
+                    <div id="score-display">Score: <span id="score">0</span>/1000</div>
                 </div>
-                
-                <div class="option-group">
-                    <div class="option-label">Difficulty</div>
-                    <select id="difficulty">
-                        <option value="3">A-C</option>
-                        <option value="5">A-E</option>
-                        <option value="7" selected>A-G</option>
-                    </select>
-                </div>
-                
-                <div class="option-group">
-                    <div class="option-label">Speed</div>
-                    <input type="range" id="speed" min="1" max="5" value="3">
-                </div>
-                
-                <div class="option-group">
-                    <button onclick="startGame()">NEW GAME</button>
-                </div>
-                
-                <div id="score-display">Score: <span id="score">0</span></div>
+            </div>
+            
+            <div id="rules-box">
+                <div class="title">RULES</div>
+                <div>+ 1 point per letter</div>
+                <div>+ 10 points for 3 same letters</div>
+                <div>Speed up at every 100 points</div>
+                <div style="margin-top: 10px; border-top: 1px solid currentColor; padding-top: 10px; font-weight: bold;">WIN: 1000 points</div>
             </div>
         </div>
     </div>
@@ -167,7 +200,7 @@
     <script>
         const WIDTH = 40;
         const HEIGHT = 20;
-        const AVAILABLE_LETTERS = 'ABCDEFGHIJK'; // A-K
+        const AVAILABLE_LETTERS = 'abcdefghijk'; // a-k lowercase
 
         let snake = [];
         let bodyLetters = [];
@@ -181,10 +214,12 @@
         let gameDifficulty = 7;
         let gameLoopId = null;
         let gameColor = '#00ff00';
+        let baseSpeed = 3;
 
         // Settings
         document.getElementById('speed').addEventListener('change', (e) => {
-            gameSpeed = parseInt(e.target.value);
+            baseSpeed = parseInt(e.target.value);
+            gameSpeed = baseSpeed;
         });
 
         document.getElementById('difficulty').addEventListener('change', (e) => {
@@ -194,11 +229,12 @@
         document.getElementById('color').addEventListener('change', (e) => {
             gameColor = e.target.value;
             document.body.style.color = gameColor;
-            document.querySelectorAll('.table-box, .table-title').forEach(el => {
+            document.documentElement.style.setProperty('--game-color', gameColor);
+            
+            // Update all elements that use currentColor
+            document.querySelectorAll('.table-box, .table-title, select, input[type="range"], button, #rules-box').forEach(el => {
                 el.style.borderColor = gameColor;
-                el.style.backgroundColor = gameColor === '#00ff00' ? '#000' : '#000';
             });
-            document.getElementById('options-panel').style.borderColor = gameColor;
         });
 
         function startGame() {
@@ -209,6 +245,7 @@
             direction = {x: 1, y: 0};
             nextDirection = {x: 1, y: 0};
             score = 0;
+            gameSpeed = baseSpeed;
             gameActive = true;
             gameOver = false;
             foods = [];
@@ -285,13 +322,23 @@
                 if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
                     let letter = foods[i].letter;
                     bodyLetters.push(letter);
-                    score++;
+                    score += 1; // 1 point per letter
 
                     // Check for 3 of same letter
                     let count = bodyLetters.filter(l => l === letter).length;
                     if (count === 3) {
                         bodyLetters = bodyLetters.filter(l => l !== letter);
+                        score += 10; // 10 bonus points for 3 same
                     }
+
+                    // Check win condition
+                    if (score >= 1000) {
+                        endGameWon("YOU WIN! 1000 POINTS!");
+                        return;
+                    }
+
+                    // Speed up every 100 points
+                    gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
 
                     foods.splice(i, 1);
                     spawnFoods();
@@ -316,6 +363,12 @@
             gameActive = false;
             gameOver = true;
             document.getElementById('status').innerHTML = `<div class="game-over">${message}</div>`;
+        }
+
+        function endGameWon(message) {
+            gameActive = false;
+            gameOver = true;
+            document.getElementById('status').innerHTML = `<div class="game-won">${message}</div>`;
         }
 
         function render() {
