@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII Snake Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        #controls {
+            margin-bottom: 20px;
+            background-color: #111;
+            padding: 15px;
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        label {
+            min-width: 100px;
+        }
+        
+        input[type="range"], select {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px;
+        }
+        
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        
+        #game-container {
+            border: 2px solid #00ff00;
+            padding: 10px;
+            background-color: #000;
+            line-height: 1.2;
+            white-space: pre;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        
+        #stats {
+            margin-top: 20px;
+            text-align: center;
+            min-height: 80px;
+        }
+        
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #00ff00;
+            color: #000;
+            border: none;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #00cc00;
+        }
+        
+        .game-over {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐍 ASCII Snake Game</h1>
+    
+    <div id="controls">
+        <div class="control-group">
+            <label>Speed:</label>
+            <input type="range" id="speed" min="1" max="5" value="3">
+            <span id="speedDisplay">3</span>
+        </div>
+        <div class="control-group">
+            <label>Difficulty:</label>
+            <select id="difficulty">
+                <option value="3">A-C</option>
+                <option value="5">A-E</option>
+                <option value="7" selected>A-G</option>
+            </select>
+        </div>
+        <div class="control-group">
+            <label><input type="checkbox" id="grid"> Show Grid</label>
+        </div>
+    </div>
+    
+    <div id="game-container"></div>
+    
+    <div id="stats">
+        <div>Score: <span id="score">0</span></div>
+        <div>Segments Cleared: <span id="cleared">0</span></div>
+        <div id="body-display">Body: (empty)</div>
+        <div id="status"></div>
+    </div>
+    
+    <button onclick="startGame()">START NEW GAME</button>
+
+    <script>
+        const WIDTH = 40;
+        const HEIGHT = 20;
+
+        let snake = [];
+        let bodyLetters = [];
+        let foods = [];
+        let direction = {x: 1, y: 0};
+        let nextDirection = {x: 1, y: 0};
+        let score = 0;
+        let cleared = 0;
+        let gameActive = false;
+        let gameOver = false;
+        let gameSpeed = 3;
+        let difficulty = 7;
+        let gameLoopId = null;
+
+        // Settings
+        document.getElementById('speed').addEventListener('change', (e) => {
+            gameSpeed = parseInt(e.target.value);
+            document.getElementById('speedDisplay').textContent = gameSpeed;
+        });
+
+        document.getElementById('difficulty').addEventListener('change', (e) => {
+            difficulty = parseInt(e.target.value);
+        });
+
+        function startGame() {
+            // Clear previous game loop
+            if (gameLoopId) clearTimeout(gameLoopId);
+
+            // Reset
+            snake = [{x: Math.floor(WIDTH / 2), y: Math.floor(HEIGHT / 2)}];
+            bodyLetters = [];
+            direction = {x: 1, y: 0};
+            nextDirection = {x: 1, y: 0};
+            score = 0;
+            cleared = 0;
+            gameActive = true;
+            gameOver = false;
+            foods = [];
+
+            document.getElementById('status').innerHTML = '';
+
+            spawnFoods();
+            render();
+            gameLoop();
+        }
+
+        function spawnFoods() {
+            const letters = 'ABCDEFG'.substring(0, difficulty);
+            while (foods.length < 3) {
+                let x = Math.floor(Math.random() * WIDTH);
+                let y = Math.floor(Math.random() * HEIGHT);
+
+                if (!isOccupied(x, y)) {
+                    let letter = letters[Math.floor(Math.random() * letters.length)];
+                    foods.push({x, y, letter});
+                }
+            }
+        }
+
+        function isOccupied(x, y) {
+            // Check snake
+            for (let segment of snake) {
+                if (segment.x === x && segment.y === y) return true;
+            }
+
+            // Check foods
+            for (let food of foods) {
+                if (food.x === x && food.y === y) return true;
+            }
+
+            return false;
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            direction = nextDirection;
+
+            // Calculate new head position
+            let newHead = {
+                x: snake[0].x + direction.x,
+                y: snake[0].y + direction.y
+            };
+
+            // Check border collision
+            if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
+                endGame("You hit the border!");
+                return;
+            }
+
+            // Check body collision
+            for (let segment of snake) {
+                if (newHead.x === segment.x && newHead.y === segment.y) {
+                    endGame("You hit yourself!");
+                    return;
+                }
+            }
+
+            snake.unshift(newHead);
+
+            // Check food collision
+            let foodEaten = false;
+            for (let i = 0; i < foods.length; i++) {
+                if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
+                    let letter = foods[i].letter;
+                    bodyLetters.push(letter);
+                    score++;
+
+                    // Check for 3 of same letter
+                    let count = bodyLetters.filter(l => l === letter).length;
+                    if (count === 3) {
+                        bodyLetters = bodyLetters.filter(l => l !== letter);
+                        cleared++;
+                    }
+
+                    foods.splice(i, 1);
+                    spawnFoods();
+                    foodEaten = true;
+                    break;
+                }
+            }
+
+            // Remove tail if no food eaten
+            if (!foodEaten) {
+                snake.pop();
+            }
+
+            render();
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            gameOver = true;
+            document.getElementById('status').innerHTML = `<div class="game-over">${message}</div>`;
+        }
+
+        function render() {
+            let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
+
+            // Draw foods
+            for (let food of foods) {
+                grid[food.y][food.x] = food.letter;
+            }
+
+            // Draw body letters (behind head)
+            for (let i = 0; i < bodyLetters.length; i++) {
+                if (i + 1 < snake.length) {
+                    let segment = snake[i + 1];
+                    grid[segment.y][segment.x] = bodyLetters[i];
+                }
+            }
+
+            // Draw rest of snake as 'o'
+            for (let i = bodyLetters.length + 1; i < snake.length; i++) {
+                let segment = snake[i];
+                grid[segment.y][segment.x] = 'o';
+            }
+
+            // Draw head
+            grid[snake[0].y][snake[0].x] = '@';
+
+            // Add grid if enabled
+            let display;
+            if (document.getElementById('grid').checked) {
+                display = grid.map((row, y) => {
+                    return row.map((cell, x) => cell).join('');
+                }).join('\n');
+            } else {
+                display = grid.map(row => row.join('')).join('\n');
+            }
+
+            document.getElementById('game-container').textContent = display;
+            document.getElementById('score').textContent = score;
+            document.getElementById('cleared').textContent = cleared;
+
+            let bodyStr = bodyLetters.length > 0 ? bodyLetters.join('') : '(empty)';
+            document.getElementById('body-display').textContent = `Body: ${bodyStr}`;
+        }
+
+        function gameLoop() {
+            update();
+            if (gameActive) {
+                const delay = 500 - (gameSpeed * 80); // Faster with higher speed
+                gameLoopId = setTimeout(gameLoop, delay);
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) nextDirection = {x: 0, y: -1};
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) nextDirection = {x: 0, y: 1};
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) nextDirection = {x: -1, y: 0};
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) nextDirection = {x: 1, y: 0};
+                    e.preventDefault();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
