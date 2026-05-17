@@ -216,6 +216,7 @@
                     // Check for 3 of same letter
                     let count = bodyLetters.filter(l => l === letter).length;
                     if (count === 3) {
+                        // Remove all 3 instances of this letter
                         bodyLetters = bodyLetters.filter(l => l !== letter);
                     }
 
@@ -226,9 +227,13 @@
                 }
             }
 
-            // Only remove tail if no food eaten - body only grows from letters
-            if (!foodEaten && bodyLetters.length > 0) {
-                bodyLetters.pop();
+            // Remove tail only when food is eaten
+            if (foodEaten) {
+                if (snake.length > bodyLetters.length + 1) {
+                    snake.pop();
+                }
+            } else {
+                snake.pop();
             }
 
             render();
