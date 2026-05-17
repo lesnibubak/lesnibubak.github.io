@@ -83,18 +83,6 @@
             width: 100%;
         }
         
-        input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
         input[type="range"]:disabled,
         select:disabled {
             opacity: 0.5;
@@ -196,10 +184,10 @@
                     </div>
 
                     <div class="option-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="obstacles">
-                            <label for="obstacles" class="option-label">Obstacles</label>
-                        </div>
+                        <div class="option-label">More Obstacles</div>
+                        <select id="obstacles">
+                            <option value="off">Off</option>
+                        </select>
                     </div>
                     
                     <div class="option-group" style="margin-top: 15px;">
@@ -215,7 +203,7 @@
                 <div>+ 1 point per letter</div>
                 <div>+ 10 points for 3 in a row</div>
                 <div>Speed up at every 100 points</div>
-                <div>+1 obstacle per 10 points</div>
+                <div>+1 obstacle per 25 points</div>
                 <div style="margin-top: 10px; border-top: 1px solid currentColor; padding-top: 10px; font-weight: bold;">WIN: 1000 points</div>
             </div>
         </div>
@@ -227,7 +215,6 @@
         const WIDTH = 40;
         const HEIGHT = 20;
         const AVAILABLE_LETTERS = 'abcdefghijk'; // a-k lowercase
-        const OBSTACLE_CHARS = '#@$%&*!=+-';
 
         let snake = [];
         let bodyLetters = [];
@@ -262,23 +249,25 @@
 
         document.getElementById('obstacles').addEventListener('change', (e) => {
             if (!gameActive) {
-                obstaclesEnabled = e.target.checked;
+                obstaclesEnabled = e.target.value !== 'off';
             }
         });
 
         document.getElementById('color').addEventListener('change', (e) => {
-            gameColor = e.target.value;
-            document.body.style.color = gameColor;
-            
-            // Update all elements
-            document.querySelectorAll('.table-box, .table-title, select, input[type="range"], #rules-box').forEach(el => {
-                el.style.borderColor = gameColor;
-            });
-            
-            // Update button with new color
-            document.getElementById('new-game-btn').style.backgroundColor = gameColor;
-            document.getElementById('new-game-btn').style.borderColor = gameColor;
-            document.getElementById('new-game-btn').style.color = '#000';
+            if (!gameActive) {
+                gameColor = e.target.value;
+                document.body.style.color = gameColor;
+                
+                // Update all elements
+                document.querySelectorAll('.table-box, .table-title, select, input[type="range"], #rules-box').forEach(el => {
+                    el.style.borderColor = gameColor;
+                });
+                
+                // Update button with new color
+                document.getElementById('new-game-btn').style.backgroundColor = gameColor;
+                document.getElementById('new-game-btn').style.borderColor = gameColor;
+                document.getElementById('new-game-btn').style.color = '#000';
+            }
         });
 
         function startGame() {
@@ -300,11 +289,7 @@
             document.getElementById('speed').disabled = true;
             document.getElementById('difficulty').disabled = true;
             document.getElementById('obstacles').disabled = true;
-
-            // Spawn initial obstacles if enabled
-            if (obstaclesEnabled) {
-                spawnObstacles(10);
-            }
+            document.getElementById('color').disabled = true;
 
             document.getElementById('status').innerHTML = '';
 
@@ -318,6 +303,7 @@
             document.getElementById('speed').disabled = false;
             document.getElementById('difficulty').disabled = false;
             document.getElementById('obstacles').disabled = false;
+            document.getElementById('color').disabled = false;
         }
 
         function spawnObstacles(count) {
@@ -326,8 +312,7 @@
                 let y = Math.floor(Math.random() * HEIGHT);
 
                 if (!isOccupied(x, y) && !obstacles.some(o => o.x === x && o.y === y)) {
-                    let char = OBSTACLE_CHARS[Math.floor(Math.random() * OBSTACLE_CHARS.length)];
-                    obstacles.push({x, y, char});
+                    obstacles.push({x, y});
                 }
             }
         }
@@ -356,12 +341,15 @@
         }
 
         function isOccupied(x, y) {
+            // Check snake head and body
             for (let segment of snake) {
                 if (segment.x === x && segment.y === y) return true;
             }
+            // Check foods
             for (let food of foods) {
                 if (food.x === x && food.y === y) return true;
             }
+            // Check obstacles
             for (let obstacle of obstacles) {
                 if (obstacle.x === x && obstacle.y === y) return true;
             }
@@ -401,9 +389,9 @@
                 return;
             }
 
-            // Check body collision
-            for (let segment of snake) {
-                if (newHead.x === segment.x && newHead.y === segment.y) {
+            // Check body collision (start from 1 to skip head)
+            for (let i = 1; i < snake.length; i++) {
+                if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
                     endGame("You hit yourself!");
                     return;
                 }
@@ -439,8 +427,8 @@
                     // Speed up every 100 points
                     gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
 
-                    // Add obstacle every 10 points if enabled
-                    if (obstaclesEnabled && score - lastObstacleScore >= 10) {
+                    // Add obstacle every 25 points (always, regardless of More Obstacles setting)
+                    if (score - lastObstacleScore >= 25) {
                         spawnObstacles(obstacles.length + 1);
                         lastObstacleScore = score;
                     }
@@ -481,9 +469,9 @@
         function render() {
             let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
 
-            // Draw obstacles
+            // Draw obstacles (hashtags only)
             for (let obstacle of obstacles) {
-                grid[obstacle.y][obstacle.x] = obstacle.char;
+                grid[obstacle.y][obstacle.x] = '#';
             }
 
             // Draw foods
