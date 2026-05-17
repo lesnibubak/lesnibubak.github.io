@@ -18,23 +18,50 @@
             min-height: 100vh;
         }
         
-        #controls {
-            margin-bottom: 20px;
-            background-color: #111;
-            padding: 15px;
-            border: 1px solid #00ff00;
-            border-radius: 5px;
-        }
-        
-        .control-group {
-            margin: 10px 0;
+        #main-container {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            gap: 40px;
+            align-items: flex-start;
         }
         
-        label {
-            min-width: 100px;
+        .table-box {
+            border: 2px solid #00ff00;
+            background-color: #000;
+        }
+        
+        .table-title {
+            border-bottom: 1px solid #00ff00;
+            padding: 5px 10px;
+            font-weight: bold;
+            background-color: #111;
+        }
+        
+        #game-container {
+            padding: 10px;
+            line-height: 1.2;
+            white-space: pre;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            min-width: 450px;
+            min-height: 280px;
+        }
+        
+        #options-panel {
+            padding: 15px;
+            min-width: 200px;
+        }
+        
+        .option-group {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .option-label {
+            font-size: 12px;
+            opacity: 0.8;
         }
         
         input[type="range"] {
@@ -43,67 +70,99 @@
             color: #00ff00;
             border: 1px solid #00ff00;
             padding: 5px;
+            width: 100%;
         }
         
-        #game-container {
-            border: 2px solid #00ff00;
-            padding: 10px;
+        select {
+            font-family: 'Courier New', monospace;
             background-color: #000;
-            line-height: 1.2;
-            white-space: pre;
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-        
-        #stats {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 16px;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px;
+            width: 100%;
         }
         
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 16px;
+            padding: 8px 15px;
+            font-size: 14px;
             background-color: #00ff00;
             color: #000;
             border: none;
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-weight: bold;
+            width: 100%;
         }
         
         button:hover {
             background-color: #00cc00;
         }
         
+        #score-display {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-top: 1px solid #00ff00;
+        }
+        
+        #status {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
         .game-over {
             color: #ff0000;
             font-weight: bold;
             font-size: 18px;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <div class="control-group">
-            <label>Speed:</label>
-            <input type="range" id="speed" min="1" max="5" value="3">
-            <span id="speedDisplay">3</span>
+    <div id="main-container">
+        <div class="table-box">
+            <div class="table-title">ASCII SNAKE</div>
+            <div id="game-container"></div>
+        </div>
+        
+        <div class="table-box">
+            <div class="table-title">OPTIONS</div>
+            <div id="options-panel">
+                <div class="option-group">
+                    <div class="option-label">Color</div>
+                    <select id="color">
+                        <option value="#00ff00">Green</option>
+                        <option value="#00ccff">Cyan</option>
+                        <option value="#ffff00">Yellow</option>
+                        <option value="#ff00ff">Magenta</option>
+                        <option value="#ffffff">White</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-label">Difficulty</div>
+                    <select id="difficulty">
+                        <option value="3">A-C</option>
+                        <option value="5">A-E</option>
+                        <option value="7" selected>A-G</option>
+                    </select>
+                </div>
+                
+                <div class="option-group">
+                    <div class="option-label">Speed</div>
+                    <input type="range" id="speed" min="1" max="5" value="3">
+                </div>
+                
+                <div class="option-group">
+                    <button onclick="startGame()">NEW GAME</button>
+                </div>
+                
+                <div id="score-display">Score: <span id="score">0</span></div>
+            </div>
         </div>
     </div>
     
-    <div id="game-container"></div>
-    
-    <div id="stats">
-        <div>Score: <span id="score">0</span></div>
-    </div>
-    
     <div id="status"></div>
-    
-    <button onclick="startGame()">START NEW GAME</button>
 
     <script>
         const WIDTH = 40;
@@ -119,12 +178,27 @@
         let gameActive = false;
         let gameOver = false;
         let gameSpeed = 3;
+        let gameDifficulty = 7;
         let gameLoopId = null;
+        let gameColor = '#00ff00';
 
         // Settings
         document.getElementById('speed').addEventListener('change', (e) => {
             gameSpeed = parseInt(e.target.value);
-            document.getElementById('speedDisplay').textContent = gameSpeed;
+        });
+
+        document.getElementById('difficulty').addEventListener('change', (e) => {
+            gameDifficulty = parseInt(e.target.value);
+        });
+
+        document.getElementById('color').addEventListener('change', (e) => {
+            gameColor = e.target.value;
+            document.body.style.color = gameColor;
+            document.querySelectorAll('.table-box, .table-title').forEach(el => {
+                el.style.borderColor = gameColor;
+                el.style.backgroundColor = gameColor === '#00ff00' ? '#000' : '#000';
+            });
+            document.getElementById('options-panel').style.borderColor = gameColor;
         });
 
         function startGame() {
@@ -148,10 +222,10 @@
 
         function spawnFoods() {
             foods = [];
-            // Spawn 5 random letters from A-K
+            const letters = AVAILABLE_LETTERS.substring(0, gameDifficulty);
             const positions = generateRandomPositions(5);
             for (let i = 0; i < 5; i++) {
-                let randomLetter = AVAILABLE_LETTERS[Math.floor(Math.random() * AVAILABLE_LETTERS.length)];
+                let randomLetter = letters[Math.floor(Math.random() * letters.length)];
                 foods.push({x: positions[i].x, y: positions[i].y, letter: randomLetter});
             }
         }
@@ -216,12 +290,11 @@
                     // Check for 3 of same letter
                     let count = bodyLetters.filter(l => l === letter).length;
                     if (count === 3) {
-                        // Remove all 3 instances of this letter
                         bodyLetters = bodyLetters.filter(l => l !== letter);
                     }
 
                     foods.splice(i, 1);
-                    spawnFoods(); // Respawn all food with new positions
+                    spawnFoods();
                     foodEaten = true;
                     break;
                 }
@@ -299,6 +372,9 @@
                     break;
             }
         });
+
+        // Initial render
+        render();
     </script>
 </body>
 </html>
