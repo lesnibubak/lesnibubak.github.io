@@ -126,6 +126,7 @@
     <script>
         const WIDTH = 40;
         const HEIGHT = 20;
+        const FIXED_LETTERS = 'ABCDE'; // Only A-E
 
         let snake = [];
         let bodyLetters = [];
@@ -151,10 +152,8 @@
         });
 
         function startGame() {
-            // Clear previous game loop
             if (gameLoopId) clearTimeout(gameLoopId);
 
-            // Reset
             snake = [{x: Math.floor(WIDTH / 2), y: Math.floor(HEIGHT / 2)}];
             bodyLetters = [];
             direction = {x: 1, y: 0};
@@ -173,29 +172,34 @@
         }
 
         function spawnFoods() {
-            const letters = 'ABCDEFG'.substring(0, difficulty);
-            while (foods.length < 3) {
+            foods = [];
+            // Always spawn A, B, C
+            const positions = generateRandomPositions(3);
+            foods.push({x: positions[0].x, y: positions[0].y, letter: 'A'});
+            foods.push({x: positions[1].x, y: positions[1].y, letter: 'B'});
+            foods.push({x: positions[2].x, y: positions[2].y, letter: 'C'});
+        }
+
+        function generateRandomPositions(count) {
+            let positions = [];
+            while (positions.length < count) {
                 let x = Math.floor(Math.random() * WIDTH);
                 let y = Math.floor(Math.random() * HEIGHT);
 
-                if (!isOccupied(x, y)) {
-                    let letter = letters[Math.floor(Math.random() * letters.length)];
-                    foods.push({x, y, letter});
+                if (!isOccupied(x, y) && !positions.some(p => p.x === x && p.y === y)) {
+                    positions.push({x, y});
                 }
             }
+            return positions;
         }
 
         function isOccupied(x, y) {
-            // Check snake
             for (let segment of snake) {
                 if (segment.x === x && segment.y === y) return true;
             }
-
-            // Check foods
             for (let food of foods) {
                 if (food.x === x && food.y === y) return true;
             }
-
             return false;
         }
 
@@ -204,7 +208,6 @@
 
             direction = nextDirection;
 
-            // Calculate new head position
             let newHead = {
                 x: snake[0].x + direction.x,
                 y: snake[0].y + direction.y
@@ -242,7 +245,7 @@
                     }
 
                     foods.splice(i, 1);
-                    spawnFoods();
+                    spawnFoods(); // Respawn all food with new positions
                     foodEaten = true;
                     break;
                 }
@@ -270,7 +273,7 @@
                 grid[food.y][food.x] = food.letter;
             }
 
-            // Draw body letters (behind head)
+            // Draw body letters
             for (let i = 0; i < bodyLetters.length; i++) {
                 if (i + 1 < snake.length) {
                     let segment = snake[i + 1];
@@ -287,16 +290,7 @@
             // Draw head
             grid[snake[0].y][snake[0].x] = '@';
 
-            // Add grid if enabled
-            let display;
-            if (document.getElementById('grid').checked) {
-                display = grid.map((row, y) => {
-                    return row.map((cell, x) => cell).join('');
-                }).join('\n');
-            } else {
-                display = grid.map(row => row.join('')).join('\n');
-            }
-
+            let display = grid.map(row => row.join('')).join('\n');
             document.getElementById('game-container').textContent = display;
             document.getElementById('score').textContent = score;
             document.getElementById('cleared').textContent = cleared;
@@ -308,7 +302,7 @@
         function gameLoop() {
             update();
             if (gameActive) {
-                const delay = 500 - (gameSpeed * 80); // Faster with higher speed
+                const delay = 500 - (gameSpeed * 80);
                 gameLoopId = setTimeout(gameLoop, delay);
             }
         }
