@@ -211,328 +211,343 @@
     <div id="status"></div>
 
     <script>
-        const WIDTH = 40;
-        const HEIGHT = 20;
-        const AVAILABLE_LETTERS = 'abcdefghijk'; // a-k lowercase
+        // --- config ---
+const WIDTH = 40;
+const HEIGHT = 20;
+const AVAILABLE_LETTERS = 'abcdefghijk'; // a-k lowercase
 
-        let snake = [];
-        let bodyLetters = [];
-        let foods = [];
-        let obstacles = [];
-        let direction = {x: 1, y: 0};
-        let nextDirection = {x: 1, y: 0};
-        let score = 0;
-        let lastObstacleScore = 0;
-        let gameActive = false;
-        let gameOver = false;
-        let gameSpeed = 4;
-        let gameDifficulty = 7;
-        let gameLoopId = null;
-        let gameColor = '#00ff00';
-        let baseSpeed = 4;
-        let obstaclesEnabled = false;
+// padding offsets in characters (ch)
+const PAD_TOP = 1;
+const PAD_LEFT = 1;
+const PAD_RIGHT = 5;
+const PAD_BOTTOM = 1;
 
-        // Settings - disabled during game
-        document.getElementById('speed').addEventListener('change', (e) => {
-            if (!gameActive) {
-                baseSpeed = parseInt(e.target.value);
-                gameSpeed = baseSpeed;
-            }
+// --- state ---
+let snake = [];
+let bodyLetters = [];
+let foods = [];
+let obstacles = [];
+let direction = {x: 1, y: 0};
+let nextDirection = {x: 1, y: 0};
+let score = 0;
+let lastObstacleScore = 0;
+let gameActive = false;
+let gameOver = false;
+let gameSpeed = 4;
+let gameDifficulty = 7;
+let gameLoopId = null;
+let gameColor = '#00ff00';
+let baseSpeed = 4;
+let obstaclesEnabled = false;
+
+// Cached DOM
+const gameContainer = document.getElementById('game-container');
+const statusEl = document.getElementById('status');
+const scoreEl = document.getElementById('score');
+const speedEl = document.getElementById('speed');
+const difficultyEl = document.getElementById('difficulty');
+const obstaclesEl = document.getElementById('obstacles');
+const colorEl = document.getElementById('color');
+const newGameBtn = document.getElementById('new-game-btn');
+
+// Utility: compute effective grid origin and size in pixels/chars if needed.
+// IMPORTANT: this script treats WIDTH/HEIGHT as logical cells; visual padding is applied
+// when rendering text by adding margins around the grid string so the JS coordinates
+// match logical 0..WIDTH-1 and 0..HEIGHT-1 without shifting due to CSS padding.
+// We therefore render the grid into the container's textContent with explicit
+// left/right padding characters and top/bottom empty lines to reflect ch padding.
+
+// Settings handlers
+speedEl.addEventListener('change', (e) => {
+    if (!gameActive) {
+        baseSpeed = parseInt(e.target.value);
+        gameSpeed = baseSpeed;
+    }
+});
+
+difficultyEl.addEventListener('change', (e) => {
+    if (!gameActive) {
+        gameDifficulty = parseInt(e.target.value);
+    }
+});
+
+obstaclesEl.addEventListener('change', (e) => {
+    if (!gameActive) {
+        obstaclesEnabled = e.target.value !== 'off';
+    }
+});
+
+colorEl.addEventListener('change', (e) => {
+    if (!gameActive) {
+        gameColor = e.target.value;
+        document.body.style.color = gameColor;
+        document.querySelectorAll('.table-box, .table-title, select, input[type="range"], #rules-box').forEach(el => {
+            el.style.borderColor = gameColor;
         });
+        newGameBtn.style.backgroundColor = gameColor;
+        newGameBtn.style.borderColor = gameColor;
+        newGameBtn.style.color = '#000';
+    }
+});
 
-        document.getElementById('difficulty').addEventListener('change', (e) => {
-            if (!gameActive) {
-                gameDifficulty = parseInt(e.target.value);
-            }
-        });
+function startGame() {
+    if (gameLoopId) clearTimeout(gameLoopId);
 
-        document.getElementById('obstacles').addEventListener('change', (e) => {
-            if (!gameActive) {
-                obstaclesEnabled = e.target.value !== 'off';
-            }
-        });
+    snake = [{x: Math.floor(WIDTH / 2), y: Math.floor(HEIGHT / 2)}];
+    bodyLetters = [];
+    direction = {x: 1, y: 0};
+    nextDirection = {x: 1, y: 0};
+    score = 0;
+    lastObstacleScore = 0;
+    gameSpeed = baseSpeed;
+    gameActive = true;
+    gameOver = false;
+    foods = [];
+    obstacles = [];
 
-        document.getElementById('color').addEventListener('change', (e) => {
-            if (!gameActive) {
-                gameColor = e.target.value;
-                document.body.style.color = gameColor;
-                
-                // Update all elements
-                document.querySelectorAll('.table-box, .table-title, select, input[type="range"], #rules-box').forEach(el => {
-                    el.style.borderColor = gameColor;
-                });
-                
-                // Update button with new color
-                document.getElementById('new-game-btn').style.backgroundColor = gameColor;
-                document.getElementById('new-game-btn').style.borderColor = gameColor;
-                document.getElementById('new-game-btn').style.color = '#000';
-            }
-        });
+    // Disable controls during game
+    speedEl.disabled = true;
+    difficultyEl.disabled = true;
+    obstaclesEl.disabled = true;
+    colorEl.disabled = true;
 
-        function startGame() {
-            if (gameLoopId) clearTimeout(gameLoopId);
+    statusEl.innerHTML = '';
 
-            snake = [{x: Math.floor(WIDTH / 2), y: Math.floor(HEIGHT / 2)}];
-            bodyLetters = [];
-            direction = {x: 1, y: 0};
-            nextDirection = {x: 1, y: 0};
-            score = 0;
-            lastObstacleScore = 0;
-            gameSpeed = baseSpeed;
-            gameActive = true;
-            gameOver = false;
-            foods = [];
-            obstacles = [];
+    spawnFoods();
+    render();
+    gameLoop();
+}
 
-            // Disable controls during game
-            document.getElementById('speed').disabled = true;
-            document.getElementById('difficulty').disabled = true;
-            document.getElementById('obstacles').disabled = true;
-            document.getElementById('color').disabled = true;
+function endGameState() {
+    speedEl.disabled = false;
+    difficultyEl.disabled = false;
+    obstaclesEl.disabled = false;
+    colorEl.disabled = false;
+}
 
-            document.getElementById('status').innerHTML = '';
+function spawnObstacles(count) {
+    while (obstacles.length < count) {
+        let x = Math.floor(Math.random() * WIDTH);
+        let y = Math.floor(Math.random() * HEIGHT);
 
-            spawnFoods();
-            render();
-            gameLoop();
+        if (!isOccupied(x, y) && !obstacles.some(o => o.x === x && o.y === y)) {
+            obstacles.push({x, y});
         }
+    }
+}
 
-        function endGameState() {
-            // Re-enable controls after game ends
-            document.getElementById('speed').disabled = false;
-            document.getElementById('difficulty').disabled = false;
-            document.getElementById('obstacles').disabled = false;
-            document.getElementById('color').disabled = false;
+function spawnFoods() {
+    foods = [];
+    const letters = AVAILABLE_LETTERS.substring(0, gameDifficulty);
+    const positions = generateRandomPositions(5);
+    for (let i = 0; i < 5; i++) {
+        let randomLetter = letters[Math.floor(Math.random() * letters.length)];
+        foods.push({x: positions[i].x, y: positions[i].y, letter: randomLetter});
+    }
+}
+
+function generateRandomPositions(count) {
+    let positions = [];
+    while (positions.length < count) {
+        let x = Math.floor(Math.random() * WIDTH);
+        let y = Math.floor(Math.random() * HEIGHT);
+
+        if (!isOccupied(x, y) && !positions.some(p => p.x === x && p.y === y)) {
+            positions.push({x, y});
         }
+    }
+    return positions;
+}
 
-        function spawnObstacles(count) {
-            while (obstacles.length < count) {
-                let x = Math.floor(Math.random() * WIDTH);
-                let y = Math.floor(Math.random() * HEIGHT);
+function isOccupied(x, y) {
+    for (let segment of snake) {
+        if (segment.x === x && segment.y === y) return true;
+    }
+    for (let food of foods) {
+        if (food.x === x && food.y === y) return true;
+    }
+    for (let obstacle of obstacles) {
+        if (obstacle.x === x && obstacle.y === y) return true;
+    }
+    return false;
+}
 
-                if (!isOccupied(x, y) && !obstacles.some(o => o.x === x && o.y === y)) {
-                    obstacles.push({x, y});
+function checkAndRemoveConsecutive() {
+    let removed = true;
+    while (removed) {
+        removed = false;
+        for (let i = 0; i < bodyLetters.length - 2; i++) {
+            if (bodyLetters[i] === bodyLetters[i + 1] && bodyLetters[i + 1] === bodyLetters[i + 2]) {
+                bodyLetters.splice(i, 3);
+                score += 10;
+                if (snake.length > bodyLetters.length + 1) {
+                    snake.splice(bodyLetters.length + 1);
                 }
+                removed = true;
+                break;
             }
         }
+    }
+}
 
-        function spawnFoods() {
-            foods = [];
-            const letters = AVAILABLE_LETTERS.substring(0, gameDifficulty);
-            const positions = generateRandomPositions(5);
-            for (let i = 0; i < 5; i++) {
-                let randomLetter = letters[Math.floor(Math.random() * letters.length)];
-                foods.push({x: positions[i].x, y: positions[i].y, letter: randomLetter});
-            }
+function update() {
+    if (!gameActive) return;
+
+    direction = nextDirection;
+
+    let newHead = {
+        x: snake[0].x + direction.x,
+        y: snake[0].y + direction.y
+    };
+
+    // Check border collision (logical grid)
+    if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
+        endGame("You hit the border!");
+        return;
+    }
+
+    for (let i = 1; i < snake.length; i++) {
+        if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
+            endGame("You hit yourself!");
+            return;
         }
+    }
 
-        function generateRandomPositions(count) {
-            let positions = [];
-            while (positions.length < count) {
-                let x = Math.floor(Math.random() * WIDTH);
-                let y = Math.floor(Math.random() * HEIGHT);
-
-                if (!isOccupied(x, y) && !positions.some(p => p.x === x && p.y === y)) {
-                    positions.push({x, y});
-                }
-            }
-            return positions;
+    for (let obstacle of obstacles) {
+        if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
+            endGame("You hit an obstacle!");
+            return;
         }
+    }
 
-        function isOccupied(x, y) {
-            // Check snake head and body
-            for (let segment of snake) {
-                if (segment.x === x && segment.y === y) return true;
-            }
-            // Check foods
-            for (let food of foods) {
-                if (food.x === x && food.y === y) return true;
-            }
-            // Check obstacles
-            for (let obstacle of obstacles) {
-                if (obstacle.x === x && obstacle.y === y) return true;
-            }
-            return false;
-        }
+    snake.unshift(newHead);
 
-        function checkAndRemoveConsecutive() {
-            // Check for 3 consecutive identical letters and remove them
-            let removed = true;
-            while (removed) {
-                removed = false;
-                for (let i = 0; i < bodyLetters.length - 2; i++) {
-                    if (bodyLetters[i] === bodyLetters[i + 1] && bodyLetters[i + 1] === bodyLetters[i + 2]) {
-                        // Found 3 consecutive identical letters
-                        bodyLetters.splice(i, 3);
-                        score += 10; // 10 bonus points for 3 in a row
-                        
-                        // Remove corresponding snake segments
-                        if (snake.length > bodyLetters.length + 1) {
-                            snake.splice(bodyLetters.length + 1);
-                        }
-                        
-                        removed = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        function update() {
-            if (!gameActive) return;
-
-            direction = nextDirection;
-
-            let newHead = {
-                x: snake[0].x + direction.x,
-                y: snake[0].y + direction.y
-            };
-
-            // Check border collision
-            if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
-                endGame("You hit the border!");
+    let foodEaten = false;
+    for (let i = 0; i < foods.length; i++) {
+        if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
+            let letter = foods[i].letter;
+            bodyLetters.push(letter);
+            score += 1;
+            checkAndRemoveConsecutive();
+            if (score >= 1000) {
+                endGameWon("YOU WIN! 1000 POINTS!");
                 return;
             }
-
-            // Check body collision (start from 1 to skip head)
-            for (let i = 1; i < snake.length; i++) {
-                if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
-                    endGame("You hit yourself!");
-                    return;
-                }
+            gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
+            if (score - lastObstacleScore >= 25) {
+                spawnObstacles(obstacles.length + 1);
+                lastObstacleScore = score;
             }
-
-            // Check obstacle collision
-            for (let obstacle of obstacles) {
-                if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
-                    endGame("You hit an obstacle!");
-                    return;
-                }
-            }
-
-            snake.unshift(newHead);
-
-            // Check food collision
-            let foodEaten = false;
-            for (let i = 0; i < foods.length; i++) {
-                if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
-                    let letter = foods[i].letter;
-                    bodyLetters.push(letter);
-                    score += 1; // 1 point per letter
-
-                    // Check for 3 consecutive identical letters
-                    checkAndRemoveConsecutive();
-
-                    // Check win condition
-                    if (score >= 1000) {
-                        endGameWon("YOU WIN! 1000 POINTS!");
-                        return;
-                    }
-
-                    // Speed up every 100 points
-                    gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
-
-                    // Add obstacle every 25 points (always, regardless of More Obstacles setting)
-                    if (score - lastObstacleScore >= 25) {
-                        spawnObstacles(obstacles.length + 1);
-                        lastObstacleScore = score;
-                    }
-
-                    foods.splice(i, 1);
-                    spawnFoods();
-                    foodEaten = true;
-                    break;
-                }
-            }
-
-            // Remove tail only when food is eaten
-            if (foodEaten) {
-                if (snake.length > bodyLetters.length + 1) {
-                    snake.pop();
-                }
-            } else {
-                snake.pop();
-            }
-
-            render();
+            foods.splice(i, 1);
+            spawnFoods();
+            foodEaten = true;
+            break;
         }
+    }
 
-        function endGame(message) {
-            gameActive = false;
-            gameOver = true;
-            endGameState();
-            document.getElementById('status').innerHTML = `<div class="game-over">${message}</div>`;
+    if (foodEaten) {
+        if (snake.length > bodyLetters.length + 1) {
+            snake.pop();
         }
+    } else {
+        snake.pop();
+    }
 
-        function endGameWon(message) {
-            gameActive = false;
-            gameOver = true;
-            endGameState();
-            document.getElementById('status').innerHTML = `<div class="game-won">${message}</div>`;
+    render();
+}
+
+function endGame(message) {
+    gameActive = false;
+    gameOver = true;
+    endGameState();
+    statusEl.innerHTML = `<div class="game-over">${message}</div>`;
+}
+
+function endGameWon(message) {
+    gameActive = false;
+    gameOver = true;
+    endGameState();
+    statusEl.innerHTML = `<div class="game-won">${message}</div>`;
+}
+
+function render() {
+    // Build grid
+    let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
+
+    for (let obstacle of obstacles) {
+        grid[obstacle.y][obstacle.x] = '#';
+    }
+
+    for (let food of foods) {
+        grid[food.y][food.x] = food.letter;
+    }
+
+    for (let i = 0; i < bodyLetters.length; i++) {
+        if (i + 1 < snake.length) {
+            let segment = snake[i + 1];
+            grid[segment.y][segment.x] = bodyLetters[i];
         }
+    }
 
-        function render() {
-            let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
+    grid[snake[0].y][snake[0].x] = '@';
 
-            // Draw obstacles (hashtags only)
-            for (let obstacle of obstacles) {
-                grid[obstacle.y][obstacle.x] = '#';
-            }
+    // Convert rows to strings
+    const rowStrings = grid.map(row => row.join(''));
 
-            // Draw foods
-            for (let food of foods) {
-                grid[food.y][food.x] = food.letter;
-            }
+    // Apply left/right padding in characters by prefixing/suffixing spaces
+    const leftPad = ' '.repeat(PAD_LEFT);
+    const rightPad = ' '.repeat(PAD_RIGHT);
+    const paddedRows = rowStrings.map(r => leftPad + r + rightPad);
 
-            // Draw body letters
-            for (let i = 0; i < bodyLetters.length; i++) {
-                if (i + 1 < snake.length) {
-                    let segment = snake[i + 1];
-                    grid[segment.y][segment.x] = bodyLetters[i];
-                }
-            }
+    // Apply top/bottom padding as empty lines
+    const emptyRow = ' '.repeat(PAD_LEFT + WIDTH + PAD_RIGHT);
+    const topRows = Array(PAD_TOP).fill(emptyRow);
+    const bottomRows = Array(PAD_BOTTOM).fill(emptyRow);
 
-            // Draw head
-            grid[snake[0].y][snake[0].x] = '@';
+    const display = topRows.concat(paddedRows).concat(bottomRows).join('\n');
 
-            let display = grid.map(row => row.join('')).join('\n');
-            document.getElementById('game-container').textContent = display;
-            document.getElementById('score').textContent = score;
-        }
+    // Set monospaced font via CSS elsewhere; here we only set textContent
+    gameContainer.textContent = display;
+    scoreEl.textContent = score;
+}
 
-        function gameLoop() {
-            update();
-            if (gameActive) {
-                const delay = 500 - (gameSpeed * 80);
-                gameLoopId = setTimeout(gameLoop, delay);
-            }
-        }
+function gameLoop() {
+    update();
+    if (gameActive) {
+        const delay = Math.max(50, 500 - (gameSpeed * 80));
+        gameLoopId = setTimeout(gameLoop, delay);
+    }
+}
 
-        document.addEventListener('keydown', (e) => {
-            if (!gameActive) return;
+// Keyboard handling (prevents reversing into self)
+document.addEventListener('keydown', (e) => {
+    if (!gameActive) return;
 
-            switch(e.key) {
-                case 'ArrowUp':
-                    if (direction.y === 0) nextDirection = {x: 0, y: -1};
-                    e.preventDefault();
-                    break;
-                case 'ArrowDown':
-                    if (direction.y === 0) nextDirection = {x: 0, y: 1};
-                    e.preventDefault();
-                    break;
-                case 'ArrowLeft':
-                    if (direction.x === 0) nextDirection = {x: -1, y: 0};
-                    e.preventDefault();
-                    break;
-                case 'ArrowRight':
-                    if (direction.x === 0) nextDirection = {x: 1, y: 0};
-                    e.preventDefault();
-                    break;
-            }
-        });
+    switch(e.key) {
+        case 'ArrowUp':
+            if (direction.y === 0) nextDirection = {x: 0, y: -1};
+            e.preventDefault();
+            break;
+        case 'ArrowDown':
+            if (direction.y === 0) nextDirection = {x: 0, y: 1};
+            e.preventDefault();
+            break;
+        case 'ArrowLeft':
+            if (direction.x === 0) nextDirection = {x: -1, y: 0};
+            e.preventDefault();
+            break;
+        case 'ArrowRight':
+            if (direction.x === 0) nextDirection = {x: 1, y: 0};
+            e.preventDefault();
+            break;
+    }
+});
 
-        // Initial render
-        render();
+// Expose start button if present
+if (newGameBtn) newGameBtn.addEventListener('click', startGame);
+
+// Initial render
+render();
     </script>
 </body>
 </html>
