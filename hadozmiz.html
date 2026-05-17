@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Snake Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #1a1a1a;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #00ff00;
+        }
+
+        #gameBoard {
+            background: #000;
+            border: 2px solid #00ff00;
+            padding: 10px;
+            line-height: 1.2;
+            font-size: 14px;
+            white-space: pre;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .info div {
+            margin: 5px 0;
+        }
+
+        .controls {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+
+        .game-over {
+            color: #ff0000;
+            font-size: 20px;
+            margin-top: 20px;
+        }
+
+        button {
+            background: #00ff00;
+            border: none;
+            color: #000;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #00cc00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 Vibe Snake</h1>
+        <div id="gameBoard"></div>
+        <div class="info">
+            <div>Body Length: <span id="bodyLength">1</span></div>
+            <div>Segments Cleared: <span id="segmentsCleared">0</span></div>
+            <div>Body: <span id="bodyDisplay">@</span></div>
+        </div>
+        <div class="controls">
+            <p>Arrow Keys to Move</p>
+            <p id="gameStatus"></p>
+        </div>
+        <button onclick="resetGame()">New Game</button>
+        <div id="gameOverMessage"></div>
+    </div>
+
+    <script>
+        const GRID_WIDTH = 40;
+        const GRID_HEIGHT = 20;
+        const SPAWN_COUNT = 3;
+
+        let snake = [{ x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) }];
+        let body = ['@']; // head is @
+        let direction = { x: 1, y: 0 };
+        let nextDirection = { x: 1, y: 0 };
+        let food = [];
+        let gameRunning = true;
+        let segmentsCleared = 0;
+
+        function randomLetter() {
+            return String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
+        }
+
+        function spawnFood() {
+            while (food.length < SPAWN_COUNT) {
+                let x = Math.floor(Math.random() * GRID_WIDTH);
+                let y = Math.floor(Math.random() * GRID_HEIGHT);
+                
+                // Check if position is not occupied by snake
+                let occupied = snake.some(seg => seg.x === x && seg.y === y);
+                if (!occupied) {
+                    food.push({ x, y, letter: randomLetter() });
+                }
+            }
+        }
+
+        function drawGame() {
+            let grid = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill('.'));
+
+            // Draw food
+            food.forEach(f => {
+                grid[f.y][f.x] = f.letter;
+            });
+
+            // Draw snake body (from tail to head)
+            for (let i = 1; i < snake.length; i++) {
+                const seg = snake[i];
+                if (seg.y >= 0 && seg.y < GRID_HEIGHT && seg.x >= 0 && seg.x < GRID_WIDTH) {
+                    grid[seg.y][seg.x] = body[i];
+                }
+            }
+
+            // Draw head
+            const head = snake[0];
+            if (head.y >= 0 && head.y < GRID_HEIGHT && head.x >= 0 && head.x < GRID_WIDTH) {
+                grid[head.y][head.x] = '@';
+            }
+
+            return grid.map(row => row.join(' ')).join('\n');
+        }
+
+        function updateBodyDisplay() {
+            document.getElementById('bodyDisplay').textContent = body.slice(1).join('');
+            document.getElementById('bodyLength').textContent = body.length;
+            document.getElementById('segmentsCleared').textContent = segmentsCleared;
+        }
+
+        function checkAndRemoveTriples() {
+            let removed = false;
+            for (let letter = 65; letter <= 90; letter++) {
+                const char = String.fromCharCode(letter);
+                let count = body.filter(seg => seg === char).length;
+                
+                while (count >= 3) {
+                    // Remove first occurrence of 3 consecutive or just 3 of the same
+                    let firstIdx = -1;
+                    for (let i = 0; i < body.length - 2; i++) {
+                        if (body[i] === char && body[i + 1] === char && body[i + 2] === char) {
+                            firstIdx = i;
+                            break;
+                        }
+                    }
+                    
+                    if (firstIdx !== -1) {
+                        body.splice(firstIdx, 3);
+                        snake.pop();
+                        snake.pop();
+                        removed = true;
+                        segmentsCleared++;
+                        count -= 3;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            return removed;
+        }
+
+        function update() {
+            if (!gameRunning) return;
+
+            direction = nextDirection;
+
+            // Move head
+            const head = snake[0];
+            const newHead = {
+                x: (head.x + direction.x + GRID_WIDTH) % GRID_WIDTH,
+                y: (head.y + direction.y + GRID_HEIGHT) % GRID_HEIGHT
+            };
+
+            // Check self collision
+            if (snake.some(seg => seg.x === newHead.x && seg.y === newHead.y)) {
+                endGame();
+                return;
+            }
+
+            snake.unshift(newHead);
+            body.unshift('@');
+
+            // Check food collision
+            let foodEaten = false;
+            for (let i = 0; i < food.length; i++) {
+                if (food[i].x === newHead.x && food[i].y === newHead.y) {
+                    const letter = food[i].letter;
+                    body.push(letter);
+                    food.splice(i, 1);
+                    foodEaten = true;
+                    break;
+                }
+            }
+
+            if (!foodEaten) {
+                snake.pop();
+                body.pop();
+            }
+
+            // Spawn more food if needed
+            if (food.length < SPAWN_COUNT) {
+                spawnFood();
+            }
+
+            // Check for triple letters and remove them
+            checkAndRemoveTriples();
+
+            // Check win condition (snake disappeared)
+            if (snake.length === 1) {
+                endGame(true);
+                return;
+            }
+
+            updateBodyDisplay();
+            document.getElementById('gameBoard').textContent = drawGame();
+        }
+
+        function endGame(won = false) {
+            gameRunning = false;
+            if (won) {
+                document.getElementById('gameOverMessage').innerHTML = '<div class="game-over">🎉 YOU WIN! Snake disappeared!</div>';
+            } else {
+                document.getElementById('gameOverMessage').innerHTML = '<div class="game-over">💀 GAME OVER! Hit yourself!</div>';
+            }
+        }
+
+        function resetGame() {
+            snake = [{ x: Math.floor(GRID_WIDTH / 2), y: Math.floor(GRID_HEIGHT / 2) }];
+            body = ['@'];
+            direction = { x: 1, y: 0 };
+            nextDirection = { x: 1, y: 0 };
+            food = [];
+            gameRunning = true;
+            segmentsCleared = 0;
+            document.getElementById('gameOverMessage').innerHTML = '';
+            spawnFood();
+            updateBodyDisplay();
+            document.getElementById('gameBoard').textContent = drawGame();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!gameRunning) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+                    e.preventDefault();
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+                    e.preventDefault();
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+                    e.preventDefault();
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        // Game loop
+        setInterval(update, 100);
+
+        // Initial setup
+        spawnFood();
+        updateBodyDisplay();
+        document.getElementById('gameBoard').textContent = drawGame();
+    </script>
+</body>
+</html>
