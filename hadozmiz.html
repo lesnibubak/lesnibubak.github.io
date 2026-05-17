@@ -366,6 +366,12 @@
                         // Found 3 consecutive identical letters
                         bodyLetters.splice(i, 3);
                         score += 10; // 10 bonus points for 3 in a row
+                        
+                        // Remove corresponding snake segments
+                        if (snake.length > bodyLetters.length + 1) {
+                            snake.splice(bodyLetters.length + 1);
+                        }
+                        
                         removed = true;
                         break;
                     }
