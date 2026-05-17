@@ -126,7 +126,7 @@
     <script>
         const WIDTH = 40;
         const HEIGHT = 20;
-        const FIXED_LETTERS = 'ABCDE'; // Only A-E
+        const AVAILABLE_LETTERS = 'ABCDEFGHIJK'; // A-K
 
         let snake = [];
         let bodyLetters = [];
@@ -173,11 +173,12 @@
 
         function spawnFoods() {
             foods = [];
-            // Always spawn A, B, C
-            const positions = generateRandomPositions(3);
-            foods.push({x: positions[0].x, y: positions[0].y, letter: 'A'});
-            foods.push({x: positions[1].x, y: positions[1].y, letter: 'B'});
-            foods.push({x: positions[2].x, y: positions[2].y, letter: 'C'});
+            // Spawn 5 random letters from A-K
+            const positions = generateRandomPositions(5);
+            for (let i = 0; i < 5; i++) {
+                let randomLetter = AVAILABLE_LETTERS[Math.floor(Math.random() * AVAILABLE_LETTERS.length)];
+                foods.push({x: positions[i].x, y: positions[i].y, letter: randomLetter});
+            }
         }
 
         function generateRandomPositions(count) {
