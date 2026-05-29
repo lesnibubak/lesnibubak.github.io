@@ -18,13 +18,6 @@
             min-height: 100vh;
         }
         
-        #main-container {
-            display: flex;
-            gap: 40px;
-            align-items: flex-start;
-            margin-bottom: 30px;
-        }
-        
         .table-box {
             border: 2px solid #00ff00;
             background-color: #000;
@@ -49,47 +42,6 @@
             overflow: hidden;
         }
         
-        #options-panel {
-            padding: 15px;
-            min-width: 200px;
-        }
-        
-        .option-group {
-            margin: 10px 0;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .option-label {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        
-        input[type="range"] {
-            font-family: 'Courier New', monospace;
-            background-color: #000;
-            border: 1px solid currentColor;
-            padding: 3px;
-            width: 100%;
-            height: 20px;
-        }
-        
-        select {
-            font-family: 'Courier New', monospace;
-            background-color: #000;
-            color: currentColor;
-            border: 1px solid currentColor;
-            padding: 5px;
-            width: 100%;
-        }
-        
-        input[type="range"]:disabled,
-        select:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
         #new-game-btn {
             padding: 8px 15px;
             font-size: 14px;
@@ -99,24 +51,53 @@
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            width: 100%;
+            width: 336px;
+            margin-top: 10px;
         }
         
         #new-game-btn:hover {
             opacity: 0.8;
         }
         
-        #score-display {
-            font-size: 16px;
+        .pad {
+            display: grid;
+            grid-template-columns: 50px 50px 50px;
+            gap: 5px;
+            margin-top: 20px;
+        }
+        
+        .pad button {
+            width: 50px;
+            height: 50px;
+            background-color: #00ff00;
+            color: #000;
+            border: 2px solid #00ff00;
+            font-size: 20px;
             font-weight: bold;
-            text-align: center;
-            padding: 10px;
-            border-top: 1px solid currentColor;
-            margin-top: 15px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+        
+        .pad button:hover {
+            opacity: 0.8;
+        }
+        
+        .pad button:active {
+            opacity: 0.6;
+        }
+        
+        .pad .empty {
+            width: 50px;
+            height: 50px;
         }
         
         #status {
             text-align: center;
+            margin-top: 20px;
         }
         
         .game-over {
@@ -130,83 +111,27 @@
             font-weight: bold;
             font-size: 18px;
         }
-        
-        #rules-box {
-            border: 2px solid currentColor;
-            background-color: #000;
-            padding: 15px;
-            max-width: 300px;
-            line-height: 1.6;
-            font-size: 13px;
-        }
-        
-        #rules-box .title {
-            font-weight: bold;
-            border-bottom: 1px solid currentColor;
-            margin-bottom: 10px;
-            padding-bottom: 5px;
-        }
     </style>
 </head>
 <body>
-    <div id="main-container">
-        <div class="table-box">
-            <div class="table-title">ASCII SNEK</div>
-            <div id="game-container"></div>
-        </div>
-        
-        <div>
-            <div class="table-box">
-                <div class="table-title">OPTIONS</div>
-                <div id="options-panel">
-                    <div class="option-group">
-                        <div class="option-label">Speed</div>
-                        <input type="range" id="speed" min="1" max="5" value="4">
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-label">Color</div>
-                        <select id="color">
-                            <option value="#00ff00">Green</option>
-                            <option value="#00ccff">Cyan</option>
-                            <option value="#ffff00">Yellow</option>
-                            <option value="#ff00ff">Magenta</option>
-                            <option value="#ffffff">White</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group">
-                        <div class="option-label">Difficulty</div>
-                        <select id="difficulty">
-                            <option value="3">A-C</option>
-                            <option value="5">A-E</option>
-                            <option value="7" selected>A-G</option>
-                        </select>
-                    </div>
+    <div class="table-box">
+        <div class="table-title">ASCII SNEK</div>
+        <div id="game-container"></div>
+    </div>
+    <button id="new-game-btn" onclick="startGame()">NEW GAME</button>
+    
+    <div class="pad" aria-label="D-pad">
+        <div class="empty"></div>
+        <button id="up" aria-label="Up">▲</button>
+        <div class="empty"></div>
 
-                    <div class="option-group">
-                        <div class="option-label">More Obstacles</div>
-                        <select id="obstacles">
-                            <option value="off">Off</option>
-                        </select>
-                    </div>
-                    
-                    <div class="option-group" style="margin-top: 15px;">
-                        <button id="new-game-btn" onclick="startGame()">NEW GAME</button>
-                    </div>
-                    
-                    <div id="score-display">Score: <span id="score">0</span>/1000</div>
-                </div>
-            </div>
-            
-            <div id="rules-box">
-                <div class="title">RULES</div>
-                <div>Connect three for 10 points and make them disappear</div>
-                <div>An obstacle appears every 25 points</div>
-                <div>Speed up at every 100 points</div>                
-                <div style="margin-top: 10px; border-top: 1px solid currentColor; padding-top: 10px; font-weight: bold;">WIN: 1000 points</div>
-            </div>
-        </div>
+        <button id="left" aria-label="Left">◀</button>
+        <div class="empty"></div>
+        <button id="right" aria-label="Right">▶</button>
+
+        <div class="empty"></div>
+        <button id="down" aria-label="Down">▼</button>
+        <div class="empty"></div>
     </div>
     
     <div id="status"></div>
@@ -214,7 +139,7 @@
     <script>
         const WIDTH = 40;
         const HEIGHT = 20;
-        const AVAILABLE_LETTERS = 'abcdefghijk'; // a-k lowercase
+        const AVAILABLE_LETTERS = 'abcdefghijk';
 
         let snake = [];
         let bodyLetters = [];
@@ -225,50 +150,11 @@
         let score = 0;
         let lastObstacleScore = 0;
         let gameActive = false;
-        let gameOver = false;
         let gameSpeed = 4;
         let gameDifficulty = 7;
         let gameLoopId = null;
         let gameColor = '#00ff00';
         let baseSpeed = 4;
-        let obstaclesEnabled = false;
-
-        // Settings - disabled during game
-        document.getElementById('speed').addEventListener('change', (e) => {
-            if (!gameActive) {
-                baseSpeed = parseInt(e.target.value);
-                gameSpeed = baseSpeed;
-            }
-        });
-
-        document.getElementById('difficulty').addEventListener('change', (e) => {
-            if (!gameActive) {
-                gameDifficulty = parseInt(e.target.value);
-            }
-        });
-
-        document.getElementById('obstacles').addEventListener('change', (e) => {
-            if (!gameActive) {
-                obstaclesEnabled = e.target.value !== 'off';
-            }
-        });
-
-        document.getElementById('color').addEventListener('change', (e) => {
-            if (!gameActive) {
-                gameColor = e.target.value;
-                document.body.style.color = gameColor;
-                
-                // Update all elements
-                document.querySelectorAll('.table-box, .table-title, select, input[type="range"], #rules-box').forEach(el => {
-                    el.style.borderColor = gameColor;
-                });
-                
-                // Update button with new color
-                document.getElementById('new-game-btn').style.backgroundColor = gameColor;
-                document.getElementById('new-game-btn').style.borderColor = gameColor;
-                document.getElementById('new-game-btn').style.color = '#000';
-            }
-        });
 
         function startGame() {
             if (gameLoopId) clearTimeout(gameLoopId);
@@ -281,15 +167,8 @@
             lastObstacleScore = 0;
             gameSpeed = baseSpeed;
             gameActive = true;
-            gameOver = false;
             foods = [];
             obstacles = [];
-
-            // Disable controls during game
-            document.getElementById('speed').disabled = true;
-            document.getElementById('difficulty').disabled = true;
-            document.getElementById('obstacles').disabled = true;
-            document.getElementById('color').disabled = true;
 
             document.getElementById('status').innerHTML = '';
 
@@ -298,16 +177,7 @@
             gameLoop();
         }
 
-        function endGameState() {
-            // Re-enable controls after game ends
-            document.getElementById('speed').disabled = false;
-            document.getElementById('difficulty').disabled = false;
-            document.getElementById('obstacles').disabled = false;
-            document.getElementById('color').disabled = false;
-        }
-
         function isTooCloseToHead(x, y) {
-            // Check if position is within 10 character radius of head
             const headX = snake[0].x;
             const headY = snake[0].y;
             const distance = Math.max(Math.abs(x - headX), Math.abs(y - headY));
@@ -353,15 +223,12 @@
         }
 
         function isOccupied(x, y) {
-            // Check snake head and body
             for (let segment of snake) {
                 if (segment.x === x && segment.y === y) return true;
             }
-            // Check foods
             for (let food of foods) {
                 if (food.x === x && food.y === y) return true;
             }
-            // Check obstacles
             for (let obstacle of obstacles) {
                 if (obstacle.x === x && obstacle.y === y) return true;
             }
@@ -369,17 +236,14 @@
         }
 
         function checkAndRemoveConsecutive() {
-            // Check for 3 consecutive identical letters and remove them
             let removed = true;
             while (removed) {
                 removed = false;
                 for (let i = 0; i < bodyLetters.length - 2; i++) {
                     if (bodyLetters[i] === bodyLetters[i + 1] && bodyLetters[i + 1] === bodyLetters[i + 2]) {
-                        // Found 3 consecutive identical letters
                         bodyLetters.splice(i, 3);
-                        score += 10; // 10 bonus points for 3 in a row
+                        score += 10;
                         
-                        // Remove corresponding snake segments
                         if (snake.length > bodyLetters.length + 1) {
                             snake.splice(bodyLetters.length + 1);
                         }
@@ -401,13 +265,11 @@
                 y: snake[0].y + direction.y
             };
 
-            // Check border collision
             if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
                 endGame("You hit the border!");
                 return;
             }
 
-            // Check body collision (start from 1 to skip head)
             for (let i = 1; i < snake.length; i++) {
                 if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
                     endGame("You hit yourself!");
@@ -415,7 +277,6 @@
                 }
             }
 
-            // Check obstacle collision
             for (let obstacle of obstacles) {
                 if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
                     endGame("You hit an obstacle!");
@@ -425,27 +286,22 @@
 
             snake.unshift(newHead);
 
-            // Check food collision
             let foodEaten = false;
             for (let i = 0; i < foods.length; i++) {
                 if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
                     let letter = foods[i].letter;
                     bodyLetters.push(letter);
-                    score += 1; // 1 point per letter
+                    score += 1;
 
-                    // Check for 3 consecutive identical letters
                     checkAndRemoveConsecutive();
 
-                    // Check win condition
                     if (score >= 1000) {
                         endGameWon("YOU WIN! 1000 POINTS!");
                         return;
                     }
 
-                    // Speed up every 100 points
                     gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
 
-                    // Add obstacle every 25 points (always, regardless of More Obstacles setting)
                     if (score - lastObstacleScore >= 25) {
                         spawnObstacles(obstacles.length + 1);
                         lastObstacleScore = score;
@@ -458,7 +314,6 @@
                 }
             }
 
-            // Remove tail only when food is eaten
             if (foodEaten) {
                 if (snake.length > bodyLetters.length + 1) {
                     snake.pop();
@@ -472,32 +327,25 @@
 
         function endGame(message) {
             gameActive = false;
-            gameOver = true;
-            endGameState();
             document.getElementById('status').innerHTML = `<div class="game-over">${message}</div>`;
         }
 
         function endGameWon(message) {
             gameActive = false;
-            gameOver = true;
-            endGameState();
             document.getElementById('status').innerHTML = `<div class="game-won">${message}</div>`;
         }
 
         function render() {
             let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
 
-            // Draw obstacles (hashtags only)
             for (let obstacle of obstacles) {
                 grid[obstacle.y][obstacle.x] = '#';
             }
 
-            // Draw foods
             for (let food of foods) {
                 grid[food.y][food.x] = food.letter;
             }
 
-            // Draw body letters
             for (let i = 0; i < bodyLetters.length; i++) {
                 if (i + 1 < snake.length) {
                     let segment = snake[i + 1];
@@ -505,12 +353,10 @@
                 }
             }
 
-            // Draw head
             grid[snake[0].y][snake[0].x] = '@';
 
             let display = grid.map(row => row.join('')).join('\n');
             document.getElementById('game-container').textContent = display;
-            document.getElementById('score').textContent = score;
         }
 
         function gameLoop() {
@@ -521,30 +367,84 @@
             }
         }
 
-        document.addEventListener('keydown', (e) => {
+        // Mobile D-Pad Controls
+        function handleKeyDown(key) {
             if (!gameActive) return;
-
-            switch(e.key) {
+            
+            switch(key) {
                 case 'ArrowUp':
                     if (direction.y === 0) nextDirection = {x: 0, y: -1};
-                    e.preventDefault();
                     break;
                 case 'ArrowDown':
                     if (direction.y === 0) nextDirection = {x: 0, y: 1};
-                    e.preventDefault();
                     break;
                 case 'ArrowLeft':
                     if (direction.x === 0) nextDirection = {x: -1, y: 0};
-                    e.preventDefault();
                     break;
                 case 'ArrowRight':
                     if (direction.x === 0) nextDirection = {x: 1, y: 0};
+                    break;
+            }
+        }
+
+        function handleKeyUp(key) {
+            // No action needed on key up for this game
+        }
+
+        const mapping = {
+            up: 'ArrowUp',
+            down: 'ArrowDown',
+            left: 'ArrowLeft',
+            right: 'ArrowRight'
+        };
+
+        function makeButton(id, key) {
+            const btn = document.getElementById(id);
+            let repeatId = null;
+
+            function pressStart() {
+                handleKeyDown(key);
+                if (repeatId) clearInterval(repeatId);
+                repeatId = setInterval(() => handleKeyDown(key), 100);
+            }
+
+            function pressEnd() {
+                if (repeatId) { clearInterval(repeatId); repeatId = null; }
+                handleKeyUp(key);
+            }
+
+            btn.addEventListener('pointerdown', e => { e.preventDefault(); pressStart(); });
+            btn.addEventListener('pointerup', () => pressEnd());
+            btn.addEventListener('pointercancel', () => pressEnd());
+            btn.addEventListener('mouseleave', () => { if (repeatId) pressEnd(); });
+            btn.addEventListener('click', e => e.preventDefault());
+
+            btn.addEventListener('keydown', e => {
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pressStart(); }
+            });
+            btn.addEventListener('keyup', e => {
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pressEnd(); }
+            });
+        }
+
+        makeButton('up', mapping.up);
+        makeButton('down', mapping.down);
+        makeButton('left', mapping.left);
+        makeButton('right', mapping.right);
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                case 'ArrowLeft':
+                case 'ArrowRight':
                     e.preventDefault();
+                    handleKeyDown(e.key);
                     break;
             }
         });
 
-        // Initial render
         render();
     </script>
 </body>
