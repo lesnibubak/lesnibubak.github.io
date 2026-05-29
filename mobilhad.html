@@ -37,8 +37,8 @@
             font-size: 14px;
             font-weight: bold;
             letter-spacing: 0;
-            width: 280px;
-            height: 280px;
+            width: 336px;
+            height: 281px;
             overflow: hidden;
             display: inline-block;
         }
@@ -52,7 +52,7 @@
             cursor: pointer;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            width: 280px;
+            width: 336px;
             margin-top: 10px;
         }
         
@@ -266,11 +266,13 @@
                 y: snake[0].y + direction.y
             };
 
+            // Check border collision FIRST - BEFORE moving
             if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
                 endGame("You hit the border!");
                 return;
             }
 
+            // Check body collision (start from 1 to skip head)
             for (let i = 1; i < snake.length; i++) {
                 if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
                     endGame("You hit yourself!");
@@ -278,6 +280,7 @@
                 }
             }
 
+            // Check obstacle collision
             for (let obstacle of obstacles) {
                 if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
                     endGame("You hit an obstacle!");
@@ -287,6 +290,7 @@
 
             snake.unshift(newHead);
 
+            // Check food collision
             let foodEaten = false;
             for (let i = 0; i < foods.length; i++) {
                 if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
@@ -315,6 +319,7 @@
                 }
             }
 
+            // Remove tail only when food is eaten
             if (foodEaten) {
                 if (snake.length > bodyLetters.length + 1) {
                     snake.pop();
@@ -389,7 +394,7 @@
         }
 
         function handleKeyUp(key) {
-            // No action needed on key up for this game
+            // No action needed on key up
         }
 
         const mapping = {
