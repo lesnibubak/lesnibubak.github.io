@@ -41,6 +41,8 @@
             word-wrap: normal;
             word-break: normal;
             overflow: hidden;
+            min-height: 280px;
+            min-width: 336px;
         }
         
         #new-game-btn {
@@ -100,6 +102,7 @@
         #status {
             text-align: center;
             margin-top: 20px;
+            min-height: 30px;
         }
         
         .game-over {
@@ -269,14 +272,14 @@
 
             // Check border collision - valid range is 0 to WIDTH-1 and 0 to HEIGHT-1
             if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
-                endGame("You hit the border!");
+                endGame("GAME OVER");
                 return;
             }
 
             // Check body collision (start from 1 to skip head)
             for (let i = 1; i < snake.length; i++) {
                 if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
-                    endGame("You hit yourself!");
+                    endGame("GAME OVER");
                     return;
                 }
             }
@@ -284,7 +287,7 @@
             // Check obstacle collision
             for (let obstacle of obstacles) {
                 if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
-                    endGame("You hit an obstacle!");
+                    endGame("GAME OVER");
                     return;
                 }
             }
@@ -452,6 +455,7 @@
             }
         });
 
+        // Initial render on page load
         render();
     </script>
 </body>
