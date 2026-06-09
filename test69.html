@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Play my awesomesauce games</title>
+  <style>
+    :root{
+      --bg:#513D63;
+      --muted:#86838A;
+      --link:#1ABFE8;
+      --card-bg:rgba(0,0,0,0.15);
+      --max-width:900px;
+      --radius:10px;
+      --accent:#f6f3ff;
+    }
+
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--accent);}
+
+    .wrap{max-width:var(--max-width);margin:32px auto;padding:20px;background:linear-gradient(180deg,rgba(0,0,0,0.18),rgba(0,0,0,0.08));border-radius:var(--radius);box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+
+    header{display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center;padding-bottom:14px;}
+    header h1{margin:0;font-size:1.5rem;letter-spacing:0.6px;color:#fff;}
+    header p{margin:0;color:var(--muted);font-size:0.95rem;}
+
+    nav{display:flex;gap:12px;justify-content:center;margin:12px 0;}
+    a, a:visited{color:var(--link);text-decoration:none;font-weight:600;}
+    a[target="_blank"]::after{content:" ↗";font-weight:400;margin-left:4px;}
+    a:hover{text-decoration:underline;}
+
+    .controls{display:flex;gap:10px;align-items:center;}
+    button{background:var(--link);color:#0b0b0b;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;}
+    button:active{transform:translateY(1px);}
+
+    .hero{display:grid;grid-template-columns:1fr;gap:14px;align-items:start;margin-top:6px;}
+    .card{background:var(--card-bg);padding:14px;border-radius:10px;color:var(--accent);}
+
+    .games ul{list-style:none;padding:0;margin:0;display:grid;gap:12px;}
+    .game{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);}
+    .game h2{margin:0;font-size:1.05rem;}
+    .meta{color:var(--muted);font-size:0.9rem;}
+    small a{color:var(--link);font-weight:500;}
+
+    footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.85rem;}
+
+    /* Responsivita */
+    @media (min-width:700px){
+      .hero{grid-template-columns:2fr 1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    <header>
+      <h1>WEelcome back to the 90s — play my awesomesauce games</h1>
+      <p>Klikni na odkaz a otevři hru v novém okně (označeno ↗)</p>
+
+      <nav>
+        <a href="#" aria-label="Stuff">stuff</a>
+        <div class="controls">
+          <button type="button">lorem ipsum</button>
+        </div>
+        <div style="color:var(--muted)">placeholder</div>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="card games" aria-labelledby="games-heading">
+        <h2 id="games-heading" style="margin-top:0">Using my immense genius I have vibecoded these creations</h2>
+
+        <ul>
+          <li class="game">
+            <h2>🐍 <a href="mobilhad.html" target="_blank" rel="noopener">SNEK — smartphone version</a></h2>
+            <div class="meta">Connect three letters in a row to make them disappear. Beware of the #.</div>
+            <small><a href="hadozmiz.html" target="_blank" rel="noopener">PC version — mainly for my testing</a></small>
+          </li>
+
+          <li class="game">
+            <h2>🇯🇵 🇧🇷 🇿🇦 <a href="en/austria.html" target="_blank" rel="noopener">Color-the-flag (English)</a></h2>
+            <div class="meta">"Next flag" currently opens a random page; may repeat — will improve later.</div>
+            <small>🇨🇿 <a href="eazy/austria.html" target="_blank" rel="noopener">ČESKÁ VERZE</a></small>
+          </li>
+        </ul>
+      </div>
+
+      <aside class="card" aria-label="Play banner">
+        <div style="text-align:center;font-weight:700">______play my awesomesauce games______</div>
+      </aside>
+    </section>
+
+    <footer>
+      <div class="meta">Notes: fixed spacing, colors, accessibility attributes; mobile-friendly layout.</div>
+    </footer>
+  </div>
+</body>
+</html>
