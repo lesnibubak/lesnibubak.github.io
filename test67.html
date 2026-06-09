@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Play my awesomesauce games</title>
+  <style>
+    :root{
+      --bg:#2f2433;        /* tmavé pozadí */
+      --card:#3e3243;      /* karta */
+      --muted:#bdb7bf;
+      --accent:#7fe7ff;    /* odkaz */
+      --glass:rgba(255,255,255,0.03);
+      --radius:12px;
+      --maxw:880px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;
+      background:var(--bg);
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:28px 16px;
+      display:flex;
+      justify-content:center;
+    }
+    .container{
+      width:100%;
+      max-width:var(--maxw);
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+      border-radius:var(--radius);
+      padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    }
+    header{display:flex;align-items:center;gap:14px;justify-content:space-between;flex-wrap:wrap}
+    .title{
+      display:flex;flex-direction:column;
+    }
+    h1{margin:0;font-size:1.1rem;letter-spacing:0.6px}
+    p.lead{margin:2px 0 0;color:var(--muted);font-size:0.9rem}
+    nav{display:flex;gap:10px;align-items:center}
+    a, a:visited{color:var(--accent);text-decoration:none;font-weight:600}
+    a[target="_blank"]::after{content:" ↗";font-weight:400;margin-left:6px}
+    .btn{background:var(--accent);color:#082029;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+    .grid{display:grid;grid-template-columns:1fr 260px;gap:14px;margin-top:16px}
+    .panel{background:var(--card);padding:14px;border-radius:10px}
+    .games{display:flex;flex-direction:column;gap:12px}
+    .game{background:var(--glass);padding:10px;border-radius:8px}
+    .game h2{margin:0;font-size:1rem}
+    .meta{color:var(--muted);font-size:0.9rem;margin-top:6px}
+    small a{color:var(--accent);font-weight:600}
+    footer{margin-top:14px;color:var(--muted);font-size:0.85rem;text-align:center}
+    @media (max-width:760px){ .grid{grid-template-columns:1fr} .panel.side{order:2} }
+  </style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div class="title">
+        <h1>WEelcome back to the 90s — play my awesomesauce games</h1>
+        <p class="lead">Jednoduše, esteticky — klikni na odkaz a otevři v novém okně.</p>
+      </div>
+      <nav>
+        <a href="#" aria-label="stuff">stuff</a>
+        <button class="btn" type="button">lorem ipsum</button>
+      </nav>
+    </header>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="games" aria-labelledby="games-heading">
+          <h2 id="games-heading" style="margin:0 0 8px 0">My creations</h2>
+
+          <div class="game">
+            <h2>🐍 <a href="mobilhad.html" target="_blank" rel="noopener">SNEK — smartphone version</a></h2>
+            <div class="meta">Spoj tři písmena, aby zmizela. Pozor na #.</div>
+            <div style="margin-top:6px"><small><a href="hadozmiz.html" target="_blank" rel="noopener">PC version (test)</a></small></div>
+          </div>
+
+          <div class="game">
+            <h2>🇯🇵 🇧🇷 🇿🇦 <a href="en/austria.html" target="_blank" rel="noopener">Color-the-flag (EN)</a></h2>
+            <div class="meta">Tlačítko "next flag" otevírá náhodnou stránku — může se opakovat.</div>
+            <div style="margin-top:6px"><small>🇨🇿 <a href="eazy/austria.html" target="_blank" rel="noopener">ČESKÁ VERZE</a></small></div>
+          </div>
+        </div>
+      </div>
+
+      <aside class="panel side" style="display:flex;align-items:center;justify-content:center;font-weight:700">
+        ______play my awesomesauce games______
+      </aside>
+    </div>
+
+    <footer>Minimal, readable, mobile-friendly — bez zbytečností.</footer>
+  </div>
+</body>
+</html>
