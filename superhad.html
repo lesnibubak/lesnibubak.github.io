@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCII SNEK</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
+
+        .tabs-wrapper {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .tab-btn {
+            padding: 6px 12px;
+            background-color: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .tab-btn:hover {
+            opacity: 0.8;
+        }
+
+        .tab-btn.active {
+            background-color: #00ff00;
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .table-box {
+            border: 2px solid #00ff00;
+            background-color: #000;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #00ff00;
+            padding: 5px 10px;
+            background-color: #111;
+            font-weight: bold;
+        }
+
+        .table-title {
+            flex: 1;
+        }
+
+        .table-score {
+            text-align: right;
+            font-size: 14px;
+        }
+
+        #game-container {
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+            white-space: pre;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 0;
+            word-wrap: normal;
+            word-break: normal;
+            overflow: hidden;
+            min-height: 280px;
+            min-width: 336px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #game-display {
+            position: relative;
+        }
+
+        .game-over-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border: 2px solid #ff6600;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #ff6600;
+            z-index: 10;
+            white-space: normal;
+            width: auto;
+        }
+
+        .game-over-overlay.game-won {
+            border-color: #ffff00;
+            color: #ffff00;
+        }
+
+        #new-game-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            background-color: #00ff00;
+            color: #000;
+            border: 1px solid #00ff00;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            width: 100%;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
+
+        #new-game-btn:hover {
+            opacity: 0.8;
+        }
+
+        .pad-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pad {
+            display: grid;
+            grid-template-columns: 50px 50px 50px;
+            gap: 5px;
+        }
+
+        .pad.hidden {
+            display: none;
+        }
+
+        .pad button {
+            width: 50px;
+            height: 50px;
+            background-color: #00ff00;
+            color: #000;
+            border: 2px solid #00ff00;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .pad button:hover {
+            opacity: 0.8;
+        }
+
+        .pad button:active {
+            opacity: 0.6;
+        }
+
+        .pad .empty {
+            width: 50px;
+            height: 50px;
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+
+        .game-over {
+            color: #ff6600;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .game-won {
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        #options-panel {
+            padding: 15px;
+            border: 2px solid #00ff00;
+            background-color: #000;
+            min-width: 336px;
+        }
+
+        .option-group {
+            margin: 15px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .option-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        input[type="range"] {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            border: 1px solid currentColor;
+            padding: 3px;
+            width: 100%;
+            height: 20px;
+        }
+
+        select {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: currentColor;
+            border: 1px solid currentColor;
+            padding: 5px;
+            width: 100%;
+        }
+
+        input[type="range"]:disabled,
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #score-display {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-top: 1px solid currentColor;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="tabs-wrapper">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('game')">GAME</button>
+            <button class="tab-btn" onclick="switchTab('settings')">SETTINGS</button>
+        </div>
+    </div>
+
+    <!-- GAME TAB -->
+    <div id="game" class="tab-content active">
+        <div class="table-box">
+            <div class="table-header">
+                <div class="table-title">ASCII SNEK</div>
+                <div class="table-score">Score: <span id="live-score">0</span></div>
+            </div>
+            <div id="game-container">
+                <div id="game-display"></div>
+            </div>
+        </div>
+        <button id="new-game-btn" onclick="startGame()">NEW GAME</button>
+
+        <div class="pad-container">
+            <div class="pad" id="pad" aria-label="D-pad">
+                <div class="empty"></div>
+                <button id="up" aria-label="Up">▲</button>
+                <div class="empty"></div>
+
+                <button id="left" aria-label="Left">◀</button>
+                <div class="empty"></div>
+                <button id="right" aria-label="Right">▶</button>
+
+                <div class="empty"></div>
+                <button id="down" aria-label="Down">▼</button>
+                <div class="empty"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settings" class="tab-content">
+        <div id="options-panel">
+            <div class="option-group">
+                <div class="option-label">Speed</div>
+                <input type="range" id="speed" min="1" max="5" value="4">
+            </div>
+
+            <div class="option-group">
+                <div class="option-label">Color</div>
+                <select id="color">
+                    <option value="#00ff00">Green</option>
+                    <option value="#00ccff">Cyan</option>
+                    <option value="#ffff00">Yellow</option>
+                    <option value="#ff00ff">Magenta</option>
+                    <option value="#ffffff">White</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <div class="option-label">Difficulty</div>
+                <select id="difficulty">
+                    <option value="3">A-C</option>
+                    <option value="5">A-E</option>
+                    <option value="7" selected>A-G</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <div class="option-label">More Obstacles</div>
+                <select id="obstacles">
+                    <option value="off">Off</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <div class="option-label">Show D-PAD</div>
+                <select id="dpad-toggle">
+                    <option value="on">On</option>
+                    <option value="off">Off</option>
+                </select>
+            </div>
+
+            <div id="score-display">Score: <span id="score">0</span>/1000</div>
+        </div>
+    </div>
+
+    <div id="status"></div>
+
+    <script>
+        const WIDTH = 40;
+        const HEIGHT = 20;
+        const AVAILABLE_LETTERS = 'abcdefghijk';
+
+        let snake = [];
+        let bodyLetters = [];
+        let foods = [];
+        let obstacles = [];
+        let direction = {x: 1, y: 0};
+        let nextDirection = {x: 1, y: 0};
+        let score = 0;
+        let lastObstacleScore = 0;
+        let gameActive = false;
+        let gameSpeed = 4;
+        let gameDifficulty = 7;
+        let gameLoopId = null;
+        let gameColor = '#00ff00';
+        let baseSpeed = 4;
+        let obstaclesEnabled = false;
+        let dpadEnabled = true;
+
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const btns = document.querySelectorAll('.tab-btn');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            btns.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+            updateTabStyles();
+        }
+
+        function updateTabStyles() {
+            const activeBtn = document.querySelector('.tab-btn.active');
+            const inactiveBtn = document.querySelector('.tab-btn:not(.active)');
+
+            if (activeBtn) {
+                activeBtn.style.backgroundColor = gameColor;
+                activeBtn.style.color = '#000';
+                activeBtn.style.borderColor = gameColor;
+            }
+
+            if (inactiveBtn) {
+                inactiveBtn.style.backgroundColor = '#000';
+                inactiveBtn.style.color = gameColor;
+                inactiveBtn.style.borderColor = gameColor;
+            }
+        }
+
+        // Settings - disabled during game
+        document.getElementById('speed').addEventListener('change', (e) => {
+            if (!gameActive) {
+                baseSpeed = parseInt(e.target.value);
+                gameSpeed = baseSpeed;
+            }
+        });
+
+        document.getElementById('difficulty').addEventListener('change', (e) => {
+            if (!gameActive) {
+                gameDifficulty = parseInt(e.target.value);
+            }
+        });
+
+        document.getElementById('obstacles').addEventListener('change', (e) => {
+            if (!gameActive) {
+                obstaclesEnabled = e.target.value !== 'off';
+            }
+        });
+
+        document.getElementById('dpad-toggle').addEventListener('change', (e) => {
+            dpadEnabled = e.target.value === 'on';
+            const pad = document.getElementById('pad');
+            if (dpadEnabled) {
+                pad.classList.remove('hidden');
+            } else {
+                pad.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('color').addEventListener('change', (e) => {
+            if (!gameActive) {
+                gameColor = e.target.value;
+                document.body.style.color = gameColor;
+
+                document.querySelectorAll('.table-box, .table-title, .table-header, select, input[type="range"], #options-panel, .tabs').forEach(el => {
+                    el.style.borderColor = gameColor;
+                });
+
+                document.querySelectorAll('.pad button').forEach(el => {
+                    el.style.backgroundColor = gameColor;
+                    el.style.borderColor = gameColor;
+                });
+
+                document.getElementById('new-game-btn').style.backgroundColor = gameColor;
+                document.getElementById('new-game-btn').style.borderColor = gameColor;
+                document.getElementById('new-game-btn').style.color = '#000';
+
+                updateTabStyles();
+            }
+        });
+
+        function startGame() {
+            if (gameLoopId) clearTimeout(gameLoopId);
+
+            snake = [{x: Math.floor(WIDTH / 2), y: Math.floor(HEIGHT / 2)}];
+            bodyLetters = [];
+            direction = {x: 1, y: 0};
+            nextDirection = {x: 1, y: 0};
+            score = 0;
+            lastObstacleScore = 0;
+            gameSpeed = baseSpeed;
+            gameActive = true;
+            foods = [];
+            obstacles = [];
+
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('game-container').innerHTML = '<div id="game-display"></div>';
+
+            // Disable controls during game
+            document.getElementById('speed').disabled = true;
+            document.getElementById('difficulty').disabled = true;
+            document.getElementById('obstacles').disabled = true;
+            document.getElementById('color').disabled = true;
+            document.getElementById('dpad-toggle').disabled = true;
+
+            spawnFoods();
+            render();
+            gameLoop();
+        }
+
+        function endGameState() {
+            document.getElementById('speed').disabled = false;
+            document.getElementById('difficulty').disabled = false;
+            document.getElementById('obstacles').disabled = false;
+            document.getElementById('color').disabled = false;
+            document.getElementById('dpad-toggle').disabled = false;
+        }
+
+        function isTooCloseToHead(x, y) {
+            const headX = snake[0].x;
+            const headY = snake[0].y;
+            const distance = Math.max(Math.abs(x - headX), Math.abs(y - headY));
+            return distance < 10;
+        }
+
+        function spawnObstacles(count) {
+            let attempts = 0;
+            while (obstacles.length < count && attempts < 100) {
+                let x = Math.floor(Math.random() * WIDTH);
+                let y = Math.floor(Math.random() * HEIGHT);
+
+                if (!isOccupied(x, y) && !isTooCloseToHead(x, y) && !obstacles.some(o => o.x === x && o.y === y)) {
+                    obstacles.push({x, y});
+                }
+                attempts++;
+            }
+        }
+
+        function spawnFoods() {
+            foods = [];
+            const letters = AVAILABLE_LETTERS.substring(0, gameDifficulty);
+            const positions = generateRandomPositions(5);
+            for (let i = 0; i < 5; i++) {
+                let randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                foods.push({x: positions[i].x, y: positions[i].y, letter: randomLetter});
+            }
+        }
+
+        function generateRandomPositions(count) {
+            let positions = [];
+            let attempts = 0;
+            while (positions.length < count && attempts < 100) {
+                let x = Math.floor(Math.random() * WIDTH);
+                let y = Math.floor(Math.random() * HEIGHT);
+
+                if (!isOccupied(x, y) && !isTooCloseToHead(x, y) && !positions.some(p => p.x === x && p.y === y)) {
+                    positions.push({x, y});
+                }
+                attempts++;
+            }
+            return positions;
+        }
+
+        function isOccupied(x, y) {
+            for (let segment of snake) {
+                if (segment.x === x && segment.y === y) return true;
+            }
+            for (let food of foods) {
+                if (food.x === x && food.y === y) return true;
+            }
+            for (let obstacle of obstacles) {
+                if (obstacle.x === x && obstacle.y === y) return true;
+            }
+            return false;
+        }
+
+        function checkAndRemoveConsecutive() {
+            let removed = true;
+            while (removed) {
+                removed = false;
+                for (let i = 0; i < bodyLetters.length - 2; i++) {
+                    if (bodyLetters[i] === bodyLetters[i + 1] && bodyLetters[i + 1] === bodyLetters[i + 2]) {
+                        bodyLetters.splice(i, 3);
+                        score += 10;
+
+                        if (snake.length > bodyLetters.length + 1) {
+                            snake.splice(bodyLetters.length + 1);
+                        }
+
+                        removed = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            direction = nextDirection;
+
+            let newHead = {
+                x: snake[0].x + direction.x,
+                y: snake[0].y + direction.y
+            };
+
+            snake.unshift(newHead);
+
+            // Check border collision AFTER moving
+            if (newHead.x < 0 || newHead.x >= WIDTH || newHead.y < 0 || newHead.y >= HEIGHT) {
+                endGame("GAME OVER");
+                return;
+            }
+
+            // Check body collision (start from 2 to skip head and exclude first segment)
+            for (let i = 2; i < snake.length; i++) {
+                if (newHead.x === snake[i].x && newHead.y === snake[i].y) {
+                    endGame("GAME OVER");
+                    return;
+                }
+            }
+
+            // Check obstacle collision
+            for (let obstacle of obstacles) {
+                if (newHead.x === obstacle.x && newHead.y === obstacle.y) {
+                    endGame("GAME OVER");
+                    return;
+                }
+            }
+
+            // Check food collision
+            let foodEaten = false;
+            for (let i = 0; i < foods.length; i++) {
+                if (newHead.x === foods[i].x && newHead.y === foods[i].y) {
+                    let letter = foods[i].letter;
+                    bodyLetters.push(letter);
+                    score += 1;
+
+                    checkAndRemoveConsecutive();
+
+                    if (score >= 1000) {
+                        endGameWon("YOU WIN! 1000 POINTS!");
+                        return;
+                    }
+
+                    gameSpeed = baseSpeed + Math.floor(score / 100) * 0.5;
+
+                    if (score - lastObstacleScore >= 25) {
+                        spawnObstacles(obstacles.length + 1);
+                        lastObstacleScore = score;
+                    }
+
+                    foods.splice(i, 1);
+                    spawnFoods();
+                    foodEaten = true;
+                    break;
+                }
+            }
+
+            // Remove tail only when food is eaten
+            if (foodEaten) {
+                if (snake.length > bodyLetters.length + 1) {
+                    snake.pop();
+                }
+            } else {
+                snake.pop();
+            }
+
+            render();
+        }
+
+        function endGame(message) {
+            gameActive = false;
+            endGameState();
+
+            let display = document.getElementById('game-display').textContent;
+            document.getElementById('game-container').innerHTML = `<div id="game-display">${display}<div class="game-over-overlay" style="color: ${gameColor}; border-color: ${gameColor};">${message}</div></div>`;
+        }
+
+        function endGameWon(message) {
+            gameActive = false;
+            endGameState();
+
+            let display = document.getElementById('game-display').textContent;
+            document.getElementById('game-container').innerHTML = `<div id="game-display">${display}<div class="game-over-overlay game-won" style="color: ${gameColor}; border-color: ${gameColor};">${message}</div></div>`;
+        }
+
+        function render() {
+            let grid = Array(HEIGHT).fill(null).map(() => Array(WIDTH).fill(' '));
+
+            for (let obstacle of obstacles) {
+                grid[obstacle.y][obstacle.x] = '#';
+            }
+
+            for (let food of foods) {
+                grid[food.y][food.x] = food.letter;
+            }
+
+            for (let i = 0; i < bodyLetters.length; i++) {
+                if (i + 1 < snake.length) {
+                    let segment = snake[i + 1];
+                    grid[segment.y][segment.x] = bodyLetters[i];
+                }
+            }
+
+            grid[snake[0].y][snake[0].x] = '@';
+
+            let display = grid.map(row => row.join('')).join('\n');
+            document.getElementById('game-display').textContent = display;
+            document.getElementById('live-score').textContent = score;
+            document.getElementById('score').textContent = score;
+        }
+
+        function gameLoop() {
+            update();
+            if (gameActive) {
+                const delay = 500 - (gameSpeed * 80);
+                gameLoopId = setTimeout(gameLoop, delay);
+            }
+        }
+
+        // Mobile D-Pad Controls
+        function handleKeyDown(key) {
+            if (!gameActive) return;
+
+            switch(key) {
+                case 'ArrowUp':
+                    if (direction.y === 0) nextDirection = {x: 0, y: -1};
+                    break;
+                case 'ArrowDown':
+                    if (direction.y === 0) nextDirection = {x: 0, y: 1};
+                    break;
+                case 'ArrowLeft':
+                    if (direction.x === 0) nextDirection = {x: -1, y: 0};
+                    break;
+                case 'ArrowRight':
+                    if (direction.x === 0) nextDirection = {x: 1, y: 0};
+                    break;
+            }
+        }
+
+        function handleKeyUp(key) {
+            // No action needed on key up
+        }
+
+        const mapping = {
+            up: 'ArrowUp',
+            down: 'ArrowDown',
+            left: 'ArrowLeft',
+            right: 'ArrowRight'
+        };
+
+        function makeButton(id, key) {
+            const btn = document.getElementById(id);
+            let repeatId = null;
+
+            function pressStart() {
+                handleKeyDown(key);
+                if (repeatId) clearInterval(repeatId);
+                repeatId = setInterval(() => handleKeyDown(key), 100);
+            }
+
+            function pressEnd() {
+                if (repeatId) { clearInterval(repeatId); repeatId = null; }
+                handleKeyUp(key);
+            }
+
+            btn.addEventListener('pointerdown', e => { e.preventDefault(); pressStart(); });
+            btn.addEventListener('pointerup', () => pressEnd());
+            btn.addEventListener('pointercancel', () => pressEnd());
+            btn.addEventListener('mouseleave', () => { if (repeatId) pressEnd(); });
+            btn.addEventListener('click', e => e.preventDefault());
+
+            btn.addEventListener('keydown', e => {
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pressStart(); }
+            });
+            btn.addEventListener('keyup', e => {
+                if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pressEnd(); }
+            });
+        }
+
+        makeButton('up', mapping.up);
+        makeButton('down', mapping.down);
+        makeButton('left', mapping.left);
+        makeButton('right', mapping.right);
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'ArrowDown':
+                case 'ArrowLeft':
+                case 'ArrowRight':
+                    e.preventDefault();
+                    handleKeyDown(e.key);
+                    break;
+            }
+        });
+
+        // Initial render on page load
+        render();
+        updateTabStyles();
+    </script>
+</body>
+</html>
