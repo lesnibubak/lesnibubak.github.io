@@ -18,24 +18,17 @@
   background-position: center;
   background-repeat: no-repeat; }
 
-  h4  { color: #86838A; 
-      align: left; }
-
   tr.popis { background-color: #564369; }
+  div.random-tag { background-color: grey; }
 </style>
       
    
   </head>
   <body>
   <div align="center">
-  <table border=0 width=800px>
+  <table border=0 width=800px height=133>
   
-    <tr height=100px>
-  <td class="pozadi" colspan=3 valign="bottom" offset=0>
-    <div style="background-color: #513D63;" border=0><h4>WEwelcome back to the 90s omg this is terrible</h4></div>
-</td></tr>
-
-    <tr align="center">
+   <tr align="center" height=33 valign="bottom">
       <td> <a href=" ">stuff </a> </td>
       <td> <button>lorem ipsum</button></td>
     <td> placeholder</td>
@@ -44,9 +37,10 @@
  <tr class="popis">
    <td  colspan=3>
     <p>well I am trying to make something with just basic knowledge of html (learned it like 20 years ago) and "some" AI hints
-    <br> I'm dull like a rock and can't get php server running on steamdeck duh
-    <br> stupid linux won|t let me change kezboard with alt shift
-
+    <br> 
+    <p> <h4>random blurbs:</h4>
+<div id="random-tag" style="margin-top:6px;color:#ffd6a5;font-weight:700;font-family:monospace"></div>
+      
       <br>
        <p> <center>_______play my awesomesauce games_______</center>
       <br>
@@ -72,7 +66,29 @@
    </ul>
    
 </td></tr>
-  </table>
-  </div>
+
+</table> </div>
+
+<!-- těsně před </body> vlož tento script -->
+<script>
+  (function(){
+    const messages = [
+      "to je způsob jak to nedělat",
+      "WEewelcome back to the 90s omg this is terrible",
+    "stupid linux won|t let me change kezboard with alt shift",
+    "I'm dull like a rock and can't get php server running on steamdeck duh",
+    "go to test69.html to see how ai wanted this designed",
+      "true professionals edit live version",
+      "noooo goddamn that ruined the collision detection again!",
+      
+            
+    ];
+    const el = document.getElementById('random-tag');
+    if(!el) return;
+    const idx = Math.floor(Math.random() * messages.length);
+    el.textContent = messages[idx];
+  })();
+</script>
+ 
   </body>
 </html>
