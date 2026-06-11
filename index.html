@@ -8,6 +8,18 @@
 
 html,body {height:100%; margin:0; background-color: #42334D;}
 
+      body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('omnissiah.png'); /* dlaždice nebo jiný obrázek */
+  background-repeat: repeat;
+  background-size: 50% /* ... */;
+  opacity: 0.2; /* průhlednost obrázku */
+  pointer-events: none;
+}
+
+
 div.hlavni {width:800px; margin:auto; background-color:#564369; border: 3px dashed #42334D; border-radius:5px; font-family:arial; }
 
 div.popis {align: justify; margin:3px; }
