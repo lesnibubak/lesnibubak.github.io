@@ -6,8 +6,13 @@
     
 <style>
 
- html, body { background-color: #42334D; height: 100%; }
+html,body {height:100%; margin:0; background-color: #42334D;}
 
+div.hlavni {width:800px; margin:auto; background-color:#564369; border: 3px dashed #42334D; border-radius:5px; font-family:arial; }
+
+div.popis {align: justify; margin:3px; }
+
+div.randomblurb {background-color:#8F8F8F; margin:5px; color:#ffd6a5; font-weight:700; font-family:monospace; padding:6px; border-radius:4px; }
 
   a { color:#1ABFE8; text-decoration: none; }
   a:hover { color: #1ABFE8; text-decoration: underline; }
@@ -17,21 +22,18 @@
   a[target="_blank"]::after { content: " ↗";}
 
 
-    table { width:800px; height:100%; border-collapse:collapse; border-spacing:0; border:0; transform:translateZ(0); }
+table {width:800px; height:100%; border-spacing:0; border:0; }
 
 td { border:0; padding:12px; -webkit-backface-visibility:hidden; backface-visibility:hidden; }
 tr.menu td { padding:0; } /* let bg image fill row */
 tr.menu { background-image:url('img/pozadi.jpg'); background-size:cover; background-position:center; background-repeat:no-repeat; }
-tr.popis, tr.popis td { background-color:#564369; }
 
 
-div.randomblurb { background-color:#8F8F8F; margin-top:6px; color:#ffd6a5; font-weight:700; font-family:monospace; padding:6px; border-radius:4px; }  
 </style>  
 
-  </head>
-  <body>
+  </head><body>
 
-  <div align="center">
+   <div class="hlavni">
     
   <table> 
   
@@ -41,11 +43,10 @@ div.randomblurb { background-color:#8F8F8F; margin-top:6px; color:#ffd6a5; font-
     <td width=33%> <font color="red">pla</font>
                   <font color="green">cehol</font>
                   <font color="blue">der</font></td>
-    </tr>
+    </tr> </table>
     
- <tr class="popis">
-   <td  colspan=3>
-    <p>well I am trying to make something with just basic knowledge of html (learned it like 20 years ago) and "some" AI hints
+ <div class="popis">
+       <p>well I am trying to make something with just basic knowledge of html (learned it like 20 years ago) and "some" AI hints
  
     
 <div class="randomblurb"> <h4>motivational blurb:</h4>
@@ -76,9 +77,8 @@ div.randomblurb { background-color:#8F8F8F; margin-top:6px; color:#ffd6a5; font-
 </li>
    </ul>
 
-</td></tr>
+</div></div>
 
-</table> </div>
 
 <!-- těsně před </body> vlož tento script -->
 <script>
