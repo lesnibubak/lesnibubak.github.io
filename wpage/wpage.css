@@ -1,0 +1,9 @@
+body {background-image: url('modra.jpg');  color: #CCFF33;}
+
+a:link {color: #C0C0C0; text-decoration: none}
+
+a:visited {color: #C0C0C0; text-decoration: none}
+
+a:hover {color: gray;}
+
+hr {noshade; color: #C0C0C0}
