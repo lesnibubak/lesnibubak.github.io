@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<title>TERMINÁL</title>
+<style>
+  body { background:#1a1028; color:#cfc6e8; font-family:monospace; }
+  #terminal {
+    width:600px; height:300px;
+    background:#0d0618; border:2px solid #6d4aff; border-radius:6px;
+    overflow-y:auto; padding:10px; margin:20px auto;
+    white-space:pre-wrap;
+  }
+  #cmdline {
+    display:block; width:600px; margin:0 auto 20px auto;
+    background:#0d0618; border:2px solid #6d4aff; border-radius:6px;
+    color:#cfc6e8; font-family:monospace; font-size:16px; padding:8px;
+  }
+  .info  { color:#8f79c9; }
+  .error { color:#ff6b6b; }
+</style>
+</head>
+<body>
+
+<!-- zobrazovací okno -->
+<div id="terminal"></div>
+
+<!-- příkazové okno -->
+<input id="cmdline" type="text" placeholder="*jdi index.html" autofocus>
+
+<script>
+  const terminal = document.getElementById('terminal');
+  const cmdline  = document.getElementById('cmdline');
+
+  // seznam stránek, které smí návštěvník otevřít (whitelist)
+  const stranky = ['index.html', 'had.html', 'superhad.html'];
+
+  function vypis(text, trida) {
+    const div = document.createElement('div');
+    if (trida) div.className = trida;
+    div.textContent = text;
+    terminal.appendChild(div);
+    terminal.scrollTop = terminal.scrollHeight; // posun dolů
+  }
+
+  cmdline.addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;      // reagujeme jen na Enter
+
+    const vstup = cmdline.value.trim();
+    cmdline.value = '';
+    if (!vstup) return;
+
+    vypis('> ' + vstup, 'info');        // echo toho, co uživatel napsal
+
+    // rozdělení příkazu: první slovo = příkaz, zbytek = argument
+    const casti = vstup.split(/\s+/);   // split podle mezer
+    const prikaz = casti[0].replace(/^\*/, '');  // odstraň hvězdičku
+    const argument = casti[1];
+
+    if (prikaz !== 'jdi') {
+      vypis('Neznamy prikaz "' + prikaz + '". Pouzij: *jdi stranka.html', 'error');
+      return;
+    }
+    if (!argument) {
+      vypis('Musis zadat stranku: *jdi index.html', 'error');
+      return;
+    }
+    if (!stranky.includes(argument)) {
+      vypis('Stranka "' + argument + '" neni v seznamu.', 'error');
+      return;
+    }
+
+    // načtení stránky přes fetch a výpis do terminálu
+    fetch(argument)
+      .then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(obsah => {
+        // odstranění HTML tagů - necháme jen čistý text
+        const doc = new DOMParser().parseFromString(obsah, 'text/html');
+        vypis(doc.body.innerText);
+      })
+      .catch(chyba => vypis('Chyba pri nacitani: ' + chyba.message, 'error'));
+  });
+
+  // uvítání
+  vypis('TERMINÁL v0.1');
+  vypis('Prikazy: *jdi stranka.html', 'info');
+  vypis('Dostupne: ' + stranky.join(', '), 'info');
+</script>
+
+</body>
+</html>
