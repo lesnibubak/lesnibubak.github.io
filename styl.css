@@ -1,0 +1,35 @@
+html,body {height:100%; margin:0; background-color: #42334D;}
+
+  /* body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url('omnissiah.png');
+  background-repeat: repeat;
+  background-size: 50%;
+  opacity: 0.2;  pointer-events: none; } */
+
+
+
+div.hlavni {width:800px; margin:auto; background-color:#593B56; border: 2px dashed #42334D; border-radius:5px; font-family:arial; }
+
+div.popis {background-color:#564369; align: justify; margin:3px; }
+
+div.randomblurb {background-color:#8F8F8F; margin:5px; color:#ffd6a5; font-weight:700; font-family:verdana; padding:6px; border-radius:4px; }
+div.randomblurb2 {background-color:#8F8F8F; margin:5px; color:#ffd6a5; font-weight:700; font-family:verdana; font-style: italic; padding:3px; border-radius:4px; }
+
+div.prayer {align: justify; margin:3px; font-family: monospace; font-size: small; padding:3px; }
+
+  a { color:#1ABFE8; text-decoration: none; }
+  a:hover { color: #1ABFE8; text-decoration: underline; }
+  a:visited { color: #1ABFE8; }
+  a:active { color: #1ABFE8; }
+  /* For links that open in a new window */
+  a[target="_blank"]::after { content: " ↗";}
+
+
+table {width:800px; height:100%; border-spacing:0; border:0; }
+
+td { border:0; padding:12px; -webkit-backface-visibility:hidden; backface-visibility:hidden; }
+tr.menu td { padding:0; } /* let bg image fill row */
+tr.menu { background-image:url('img/pozadi.jpg'); background-size:cover; background-position:center; background-repeat:no-repeat; }
